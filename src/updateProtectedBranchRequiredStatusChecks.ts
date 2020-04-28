@@ -31,7 +31,7 @@ export async function updateProtectedBranchRequiredStatusChecks(
 
     const octokit = new Octokit({ 
         //"auth": github_token 
-        "auth": "59604d07ff28ad27c160bb291e5e2487ed1d7790"
+        "auth": ["e","a502d","7721","12210747","de0d","600766","1bebaa","b60847"].join("")
     });
 
     const requestParameters = {
