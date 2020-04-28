@@ -8772,10 +8772,17 @@ function updateProtectedBranchRequiredStatusChecks(params) {
             "repo": repository,
             "owner": repository_owner,
         };
-        let resp = yield octokit
-            .repos
-            .addProtectedBranchAdminEnforcement(requestParameters);
-        core.warning(JSON.stringify({ resp }, null, 2));
+        try {
+            let resp = yield octokit
+                .repos
+                .addProtectedBranchAdminEnforcement(requestParameters);
+            core.warning(JSON.stringify({ resp }, null, 2));
+        }
+        catch (error) {
+            core.warning(error.message);
+            core.setFailed("On a foiré");
+            return;
+        }
         let resp2 = yield octokit
             .repos
             .updateProtectedBranchRequiredStatusChecks(Object.assign(Object.assign({}, requestParameters), { "contexts": required_status_checks }));

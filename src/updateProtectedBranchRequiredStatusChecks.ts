@@ -33,12 +33,24 @@ export async function updateProtectedBranchRequiredStatusChecks(
         "owner": repository_owner,
     } as const;
 
+    try {
+
     let resp= await octokit
         .repos
         .addProtectedBranchAdminEnforcement(requestParameters)
         ;
 
     core.warning(JSON.stringify({ resp }, null, 2));
+
+    }catch(error){
+
+        core.warning(error.message);
+
+        core.setFailed("On a foiré");
+
+        return;
+
+    }
 
     let resp2= await octokit
         .repos
