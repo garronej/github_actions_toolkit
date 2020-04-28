@@ -18069,6 +18069,7 @@ exports.urlJoin = __webpack_require__(683);
 const core = __importStar(__webpack_require__(470));
 function checkVersionNumberUpdated(params) {
     return __awaiter(this, void 0, void 0, function* () {
+        core.debug("On est là");
         const { repository } = params;
         const { version } = __webpack_require__(395);
         const latest_version_deployed = yield node_fetch_1.default(exports.urlJoin("https://raw.github.com", repository, "master", "package.json"))

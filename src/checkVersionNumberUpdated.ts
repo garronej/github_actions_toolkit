@@ -5,6 +5,8 @@ import * as core from '@actions/core'
 
 export async function checkVersionNumberUpdated(params: Record<"repository", string>) {
 
+    core.debug("On est là");
+
     const { repository } = params;
 
     const { version } = require("./package.json");
