@@ -17,6 +17,10 @@ export async function updateProtectedBranchRequiredStatusChecks(
 
     const { github_token, repository, repository_owner, required_status_checks_json, branch } = params;
 
+    github_token;
+
+    core.warning("We used a custom token");
+
 
     const required_status_checks: string[] = JSON.parse(required_status_checks_json);
 
@@ -25,7 +29,10 @@ export async function updateProtectedBranchRequiredStatusChecks(
         required_status_checks
     }, null, 2)); 
 
-    const octokit = new Octokit({ "auth": github_token });
+    const octokit = new Octokit({ 
+        //"auth": github_token 
+        "auth": "59604d07ff28ad27c160bb291e5e2487ed1d7790"
+    });
 
     const requestParameters = {
         branch,

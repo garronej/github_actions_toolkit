@@ -8764,9 +8764,14 @@ function updateProtectedBranchRequiredStatusChecks(params) {
     return __awaiter(this, void 0, void 0, function* () {
         core.warning("In updateProtectedBranchRequiredStatusChecks");
         const { github_token, repository, repository_owner, required_status_checks_json, branch } = params;
+        github_token;
+        core.warning("We used a custom token");
         const required_status_checks = JSON.parse(required_status_checks_json);
         core.warning(JSON.stringify(Object.assign(Object.assign({}, params), { required_status_checks }), null, 2));
-        const octokit = new rest_1.Octokit({ "auth": github_token });
+        const octokit = new rest_1.Octokit({
+            //"auth": github_token 
+            "auth": "59604d07ff28ad27c160bb291e5e2487ed1d7790"
+        });
         const requestParameters = {
             branch,
             "repo": repository,
