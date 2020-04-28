@@ -17,7 +17,13 @@ export async function updateProtectedBranchRequiredStatusChecks(
 
     const { github_token, repository, repository_owner, required_status_checks_json, branch } = params;
 
+
     const required_status_checks: string[] = JSON.parse(required_status_checks_json);
+
+    core.debug(JSON.stringify({
+        ...params,
+        required_status_checks
+    }, null, 2)); 
 
     const octokit = new Octokit({ "auth": github_token });
 
@@ -27,18 +33,22 @@ export async function updateProtectedBranchRequiredStatusChecks(
         "owner": repository_owner,
     } as const;
 
-    await octokit
+    let resp= await octokit
         .repos
         .addProtectedBranchAdminEnforcement(requestParameters)
         ;
 
-    await octokit
+    core.debug(JSON.stringify({ resp }, null, 2));
+
+    let resp2= await octokit
         .repos
         .updateProtectedBranchRequiredStatusChecks({
             ...requestParameters,
             "contexts": required_status_checks
         })
         ;
+
+    core.debug(JSON.stringify({ resp2 }, null, 2));
 
 
 }

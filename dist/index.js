@@ -8765,18 +8765,21 @@ function updateProtectedBranchRequiredStatusChecks(params) {
         core.debug("In updateProtectedBranchRequiredStatusChecks");
         const { github_token, repository, repository_owner, required_status_checks_json, branch } = params;
         const required_status_checks = JSON.parse(required_status_checks_json);
+        core.debug(JSON.stringify(Object.assign(Object.assign({}, params), { required_status_checks }), null, 2));
         const octokit = new rest_1.Octokit({ "auth": github_token });
         const requestParameters = {
             branch,
             "repo": repository,
             "owner": repository_owner,
         };
-        yield octokit
+        let resp = yield octokit
             .repos
             .addProtectedBranchAdminEnforcement(requestParameters);
-        yield octokit
+        core.debug(JSON.stringify({ resp }, null, 2));
+        let resp2 = yield octokit
             .repos
             .updateProtectedBranchRequiredStatusChecks(Object.assign(Object.assign({}, requestParameters), { "contexts": required_status_checks }));
+        core.debug(JSON.stringify({ resp2 }, null, 2));
     });
 }
 exports.updateProtectedBranchRequiredStatusChecks = updateProtectedBranchRequiredStatusChecks;
