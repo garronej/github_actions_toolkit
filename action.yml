@@ -5,45 +5,33 @@ inputs:
   action_name:              
     required: true
     description: 'input description here'
-  
-  # Parameters
-
   repository:
     required: false
     description: 'userNameOrOrg/repositoryName'
-  
   branch:
     required: false
     description: 'example: master'
-  
   github_token:
     required: false
     description: 'secret.GITHUB_TOKEN'
-
   repository_owner:
     required: false
     description: 'github.repository_owner'
-
   required_status_checks_json:
     required: false
     description: 'example: ''["build","test"]'''
-
   move_dist_files_to_root:
     required: false
     description: 'TODO'
-
   remove_sources:
     required: false
     description: 'TODO'
-
   only_include_on_master_branches_the_dist_files_packed_in_the_npm_bundle:
     required: false
     description: 'TODO'
-
   remove_test_files:
     required: false
     description: 'TODO'
-  
 runs:
   using: 'node12'
   main: 'dist/index.js'
