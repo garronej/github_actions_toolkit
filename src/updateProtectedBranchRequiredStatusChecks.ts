@@ -13,14 +13,14 @@ export async function updateProtectedBranchRequiredStatusChecks(
     >
 ) {
 
-    core.debug("In updateProtectedBranchRequiredStatusChecks");
+    core.warning("In updateProtectedBranchRequiredStatusChecks");
 
     const { github_token, repository, repository_owner, required_status_checks_json, branch } = params;
 
 
     const required_status_checks: string[] = JSON.parse(required_status_checks_json);
 
-    core.debug(JSON.stringify({
+    core.warning(JSON.stringify({
         ...params,
         required_status_checks
     }, null, 2)); 
@@ -38,7 +38,7 @@ export async function updateProtectedBranchRequiredStatusChecks(
         .addProtectedBranchAdminEnforcement(requestParameters)
         ;
 
-    core.debug(JSON.stringify({ resp }, null, 2));
+    core.warning(JSON.stringify({ resp }, null, 2));
 
     let resp2= await octokit
         .repos
@@ -48,7 +48,7 @@ export async function updateProtectedBranchRequiredStatusChecks(
         })
         ;
 
-    core.debug(JSON.stringify({ resp2 }, null, 2));
+    core.warning(JSON.stringify({ resp2 }, null, 2));
 
 
 }

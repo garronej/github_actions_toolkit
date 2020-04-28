@@ -8762,10 +8762,10 @@ const core = __importStar(__webpack_require__(470));
 const rest_1 = __webpack_require__(889);
 function updateProtectedBranchRequiredStatusChecks(params) {
     return __awaiter(this, void 0, void 0, function* () {
-        core.debug("In updateProtectedBranchRequiredStatusChecks");
+        core.warning("In updateProtectedBranchRequiredStatusChecks");
         const { github_token, repository, repository_owner, required_status_checks_json, branch } = params;
         const required_status_checks = JSON.parse(required_status_checks_json);
-        core.debug(JSON.stringify(Object.assign(Object.assign({}, params), { required_status_checks }), null, 2));
+        core.warning(JSON.stringify(Object.assign(Object.assign({}, params), { required_status_checks }), null, 2));
         const octokit = new rest_1.Octokit({ "auth": github_token });
         const requestParameters = {
             branch,
@@ -8775,11 +8775,11 @@ function updateProtectedBranchRequiredStatusChecks(params) {
         let resp = yield octokit
             .repos
             .addProtectedBranchAdminEnforcement(requestParameters);
-        core.debug(JSON.stringify({ resp }, null, 2));
+        core.warning(JSON.stringify({ resp }, null, 2));
         let resp2 = yield octokit
             .repos
             .updateProtectedBranchRequiredStatusChecks(Object.assign(Object.assign({}, requestParameters), { "contexts": required_status_checks }));
-        core.debug(JSON.stringify({ resp2 }, null, 2));
+        core.warning(JSON.stringify({ resp2 }, null, 2));
     });
 }
 exports.updateProtectedBranchRequiredStatusChecks = updateProtectedBranchRequiredStatusChecks;
