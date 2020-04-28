@@ -42,6 +42,8 @@ const getParams = <U extends typeof inputsNames[number]>(arr: readonly U[]) => {
 
 async function run(): Promise<void> {
 
+  core.debug("In run!");
+
   switch (getInput("action_name")) {
     case "update_protected_branch_required_status_checks": await updateProtectedBranchRequiredStatusChecks(
       getParams([

@@ -10178,6 +10178,7 @@ const getParams = (arr) => {
 };
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
+        core.debug("In run!");
         switch (getInput("action_name")) {
             case "update_protected_branch_required_status_checks":
                 yield updateProtectedBranchRequiredStatusChecks_1.updateProtectedBranchRequiredStatusChecks(getParams([
@@ -10239,10 +10240,19 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+const core = __importStar(__webpack_require__(470));
 const rest_1 = __webpack_require__(889);
 function updateProtectedBranchRequiredStatusChecks(params) {
     return __awaiter(this, void 0, void 0, function* () {
+        core.debug("In updateProtectedBranchRequiredStatusChecks");
         const { github_token, repository, repository_owner, required_status_checks_json, branch } = params;
         const required_status_checks = JSON.parse(required_status_checks_json);
         const octokit = new rest_1.Octokit({ "auth": github_token });

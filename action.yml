@@ -1,5 +1,5 @@
 name: 'Denoify kickstart actions'
-description: 'Implements some step of the denoify_kickstart template workflows that are too complex to be implemented directly with bash and thrird party actions.'
+description: 'Implements some step of the denoify_kickstart template workflows that are too complex to be implemented directly with bash and third party actions.'
 author: 'u/garronej'
 inputs:
   action_name:              

@@ -5,7 +5,7 @@ import * as path from 'path'
 
 test('throws invalid number', async () => {
   const input = parseInt('foo', 10)
-  await expect(wait(input)).rejects.toThrow('milliseconds not a number')
+  await expect(wait(input)).rejects.toThrow('milliseconds not a number (test ran)')
 })
 
 test('wait 500 ms', async () => {
