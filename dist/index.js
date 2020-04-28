@@ -12120,14 +12120,6 @@ module.exports = readShebang;
 
 /***/ }),
 
-/***/ 395:
-/***/ (function() {
-
-eval("require")("./package.json");
-
-
-/***/ }),
-
 /***/ 402:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -18067,14 +18059,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const node_fetch_1 = __importDefault(__webpack_require__(454));
 exports.urlJoin = __webpack_require__(683);
 const core = __importStar(__webpack_require__(470));
-const st = __importStar(__webpack_require__(425));
+const path = __importStar(__webpack_require__(622));
 function checkVersionNumberUpdated(params) {
     return __awaiter(this, void 0, void 0, function* () {
         const { repository } = params;
-        core.warning("ok this is a warning: process.cwd" + process.cwd());
-        const out = yield st.exec("ls -lR");
-        core.debug("ls -lR: " + out);
-        const { version } = __webpack_require__(395).version;
+        const { version } = require(path.join(process.cwd(), "./package.json"));
         core.debug("version: " + version);
         const latest_version_deployed = yield node_fetch_1.default(exports.urlJoin("https://raw.github.com", repository, "master", "package.json"))
             .then(res => res.text())
@@ -18086,7 +18075,7 @@ function checkVersionNumberUpdated(params) {
             return;
         }
         if (latest_version_deployed === version) {
-            core.setFailed("The package.json need to be updated");
+            core.setFailed(`The package.json version ( currently ${version} ) need to be bumped`);
             return;
         }
         core.debug(`Ok ${latest_version_deployed} -> ${version}`);

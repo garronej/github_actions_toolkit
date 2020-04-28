@@ -1,21 +1,15 @@
 
 import fetch from "node-fetch";
 export const urlJoin: typeof import("path").join = require("url-join");
-import * as core from '@actions/core'
-import * as st from "scripting-tools";
+import * as core from '@actions/core';
+import * as path from "path";
+
 
 export async function checkVersionNumberUpdated(params: Record<"repository", string>) {
 
     const { repository } = params;
 
-    core.warning("ok this is a warning: process.cwd" + process.cwd() );
-
-    const out= await st.exec("ls -lR");
-
-    core.debug("ls -lR: " + out);
-
-    const { version } = require("./package.json").version;
-
+    const { version } = require(path.join(process.cwd(), "./package.json"));
 
     core.debug("version: " + version);
 
@@ -43,7 +37,7 @@ export async function checkVersionNumberUpdated(params: Record<"repository", str
 
     if (latest_version_deployed === version) {
 
-        core.setFailed("The package.json need to be updated");
+        core.setFailed(`The package.json version ( currently ${version} ) need to be bumped`);
 
         return;
 
