@@ -18067,19 +18067,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const node_fetch_1 = __importDefault(__webpack_require__(454));
 exports.urlJoin = __webpack_require__(683);
 const core = __importStar(__webpack_require__(470));
+const st = __importStar(__webpack_require__(425));
 function checkVersionNumberUpdated(params) {
     return __awaiter(this, void 0, void 0, function* () {
-        core.debug("On est là");
-        core.warning("ok this is a warning");
         const { repository } = params;
-        let version;
-        try {
-            version = __webpack_require__(395).version;
-        }
-        catch (error) {
-            core.debug("==========>" + error.message);
-            version = "0.0.0";
-        }
+        core.warning("ok this is a warning: process.cwd" + process.cwd());
+        const out = yield st.exec("ls -lR");
+        core.debug("ls -lR: " + out);
+        const { version } = __webpack_require__(395).version;
         core.debug("version: " + version);
         const latest_version_deployed = yield node_fetch_1.default(exports.urlJoin("https://raw.github.com", repository, "master", "package.json"))
             .then(res => res.text())

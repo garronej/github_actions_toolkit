@@ -2,28 +2,20 @@
 import fetch from "node-fetch";
 export const urlJoin: typeof import("path").join = require("url-join");
 import * as core from '@actions/core'
+import * as st from "scripting-tools";
 
 export async function checkVersionNumberUpdated(params: Record<"repository", string>) {
 
-    core.debug("On est là");
-
-    core.warning("ok this is a warning");
-
     const { repository } = params;
 
-    let version: string;
+    core.warning("ok this is a warning: process.cwd" + process.cwd() );
 
-    try{ 
+    const out= await st.exec("ls -lR");
 
-        version = require("./package.json").version;
+    core.debug("ls -lR: " + out);
 
-    }catch(error){
+    const { version } = require("./package.json").version;
 
-            core.debug("==========>" + error.message);
-
-            version = "0.0.0";
-
-    }
 
     core.debug("version: " + version);
 
