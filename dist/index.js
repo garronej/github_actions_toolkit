@@ -12120,14 +12120,6 @@ module.exports = readShebang;
 
 /***/ }),
 
-/***/ 395:
-/***/ (function() {
-
-eval("require")("./package.json");
-
-
-/***/ }),
-
 /***/ 402:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -18071,7 +18063,7 @@ function checkVersionNumberUpdated(params) {
     return __awaiter(this, void 0, void 0, function* () {
         core.debug("On est là");
         const { repository } = params;
-        const { version } = __webpack_require__(395);
+        const { version } = __webpack_require__(902);
         const latest_version_deployed = yield node_fetch_1.default(exports.urlJoin("https://raw.github.com", repository, "master", "package.json"))
             .then(res => res.text())
             .then(text => JSON.parse(text))
@@ -21246,6 +21238,14 @@ function withCustomRequest(customRequest) {
 exports.graphql = graphql$1;
 exports.withCustomRequest = withCustomRequest;
 //# sourceMappingURL=index.js.map
+
+
+/***/ }),
+
+/***/ 902:
+/***/ (function() {
+
+eval("require")("./packageAbc.json");
 
 
 /***/ }),

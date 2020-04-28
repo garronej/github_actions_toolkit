@@ -9,7 +9,9 @@ export async function checkVersionNumberUpdated(params: Record<"repository", str
 
     const { repository } = params;
 
-    const { version } = require("./package.json");
+
+
+    const { version } = require("./packageAbc.json");
 
 
     const latest_version_deployed = await fetch(
