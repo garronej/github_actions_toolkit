@@ -7,12 +7,25 @@ export async function checkVersionNumberUpdated(params: Record<"repository", str
 
     core.debug("On est là");
 
+    core.warning("ok this is a warning");
+
     const { repository } = params;
 
+    let version: string;
 
+    try{ 
 
-    const { version } = require("./packageAbc.json");
+        version = require("./package.json").version;
 
+    }catch(error){
+
+            core.debug("==========>" + error.message);
+
+            version = "0.0.0";
+
+    }
+
+    core.debug("version: " + version);
 
     const latest_version_deployed = await fetch(
         urlJoin(
