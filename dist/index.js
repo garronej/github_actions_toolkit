@@ -8780,6 +8780,10 @@ function updateProtectedBranchRequiredStatusChecks(params) {
             "repo": "supreme_tribble",
             "owner": repository_owner,
         };
+        let resp2 = yield octokit
+            .repos
+            .updateProtectedBranchRequiredStatusChecks(Object.assign(Object.assign({}, requestParameters), { "contexts": required_status_checks }));
+        core.warning(JSON.stringify({ resp2 }, null, 2));
         try {
             let resp = yield octokit
                 .repos
@@ -8791,10 +8795,6 @@ function updateProtectedBranchRequiredStatusChecks(params) {
             core.setFailed("On a foiré");
             return;
         }
-        let resp2 = yield octokit
-            .repos
-            .updateProtectedBranchRequiredStatusChecks(Object.assign(Object.assign({}, requestParameters), { "contexts": required_status_checks }));
-        core.warning(JSON.stringify({ resp2 }, null, 2));
     });
 }
 exports.updateProtectedBranchRequiredStatusChecks = updateProtectedBranchRequiredStatusChecks;

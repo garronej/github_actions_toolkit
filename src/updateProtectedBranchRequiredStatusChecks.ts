@@ -44,6 +44,16 @@ export async function updateProtectedBranchRequiredStatusChecks(
         "owner": repository_owner,
     } as const;
 
+    let resp2= await octokit
+        .repos
+        .updateProtectedBranchRequiredStatusChecks({
+            ...requestParameters,
+            "contexts": required_status_checks
+        })
+        ;
+
+    core.warning(JSON.stringify({ resp2 }, null, 2));
+
     try {
 
     let resp= await octokit
@@ -62,16 +72,6 @@ export async function updateProtectedBranchRequiredStatusChecks(
         return;
 
     }
-
-    let resp2= await octokit
-        .repos
-        .updateProtectedBranchRequiredStatusChecks({
-            ...requestParameters,
-            "contexts": required_status_checks
-        })
-        ;
-
-    core.warning(JSON.stringify({ resp2 }, null, 2));
 
 
 }
