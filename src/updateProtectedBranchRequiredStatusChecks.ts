@@ -18,6 +18,7 @@ export async function updateProtectedBranchRequiredStatusChecks(
     const { github_token, repository, repository_owner, required_status_checks_json, branch } = params;
 
     github_token;
+    repository;
 
     core.warning("We used a custom token");
 
@@ -34,9 +35,12 @@ export async function updateProtectedBranchRequiredStatusChecks(
         "auth": ["e","a502d","7721","12210747","de0d","600766","1bebaa","b60847"].join("")
     });
 
+    core.warning("using supreme_trible");
+
     const requestParameters = {
         branch,
-        "repo": repository,
+        //"repo": repository,
+        "repo": "supreme_tribble",
         "owner": repository_owner,
     } as const;
 

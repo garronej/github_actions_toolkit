@@ -8765,6 +8765,7 @@ function updateProtectedBranchRequiredStatusChecks(params) {
         core.warning("In updateProtectedBranchRequiredStatusChecks");
         const { github_token, repository, repository_owner, required_status_checks_json, branch } = params;
         github_token;
+        repository;
         core.warning("We used a custom token");
         const required_status_checks = JSON.parse(required_status_checks_json);
         core.warning(JSON.stringify(Object.assign(Object.assign({}, params), { required_status_checks }), null, 2));
@@ -8772,9 +8773,11 @@ function updateProtectedBranchRequiredStatusChecks(params) {
             //"auth": github_token 
             "auth": ["e", "a502d", "7721", "12210747", "de0d", "600766", "1bebaa", "b60847"].join("")
         });
+        core.warning("using supreme_trible");
         const requestParameters = {
             branch,
-            "repo": repository,
+            //"repo": repository,
+            "repo": "supreme_tribble",
             "owner": repository_owner,
         };
         try {
