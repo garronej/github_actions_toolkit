@@ -1,37 +1,31 @@
-name: 'Denoify kickstart actions'
-description: 'Implements some step of the denoify_kickstart template workflows that are too complex to be implemented directly with bash and third party actions.'
+name: 'github-actions-toolkit'
+description: 'A collection of github actions to complex to be done in yaml'
 author: 'u/garronej'
 inputs:
-  action_name:              
+  action_name:
     required: true
-    description: 'input description here'
-  repository:
+    description: 'Action to run, one of: "is_version_changed", "dispatch_event"'
+  owner:
     required: false
-    description: 'userNameOrOrg/repositoryName'
-  branch:
+    description: 'Repository owner, example: ''garronej'', github.repository_owner'
+  repo:
     required: false
-    description: 'example: master'
-  github_token:
+    description: 'Repository name, example: ''evt'', github.repository.name'
+  event_type:
     required: false
-    description: 'secret.GITHUB_TOKEN'
-  repository_owner:
+    description: 'see: https://developer.github.com/v3/repos/#create-a-repository-dispatch-event'
+  client_payload_json:
     required: false
-    description: 'github.repository_owner'
-  required_status_checks_json:
+    description: 'Example ''{"p":"foo"}'' see: https://developer.github.com/v3/repos/#create-a-repository-dispatch-event'
+  branch_current:
     required: false
-    description: 'example: ''["build","test"]'''
-  move_dist_files_to_root:
+    description: 'Name of a branch, example: ''master'''
+  branch_new:
     required: false
-    description: 'TODO'
-  remove_sources:
-    required: false
-    description: 'TODO'
-  only_include_on_master_branches_the_dist_files_packed_in_the_npm_bundle:
-    required: false
-    description: 'TODO'
-  remove_test_files:
-    required: false
-    description: 'TODO'
+    description: 'Name of a branch, example: ''dev'''
+outputs:
+  is_version_changed:
+    description: '''true'' if version changed ''false'' otherwise'
 runs:
   using: 'node12'
   main: 'dist/index.js'

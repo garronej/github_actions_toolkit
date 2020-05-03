@@ -1,36 +1,37 @@
 
-# denoify_kickstart_action
+# github-action-toolkit
 
-Github Actions for https://github.com/garronej/denoify_kickstart
-
-## Code in Master
-
-Install the dependencies  
 ```bash
-$ npm install
+npm install
+npm run build
 ```
 
-Build the typescript and package it for distribution
-```bash
-$ npm run build && npm run pack
+Example use:  
+```yaml
+  trigger-deploy:
+    runs-on: ubuntu-latest
+    needs:
+      - test-node
+      - test-deno
+    steps:
+      - name: Check if package.json version have changed
+        id: id1
+        uses: garronej/github-actions-toolkit@master
+        with: 
+          action_name: is_version_changed
+          owner: ${{github.repository_owner}}
+          repo: ${{github.repository.name}}
+          branch_current: ${{master}}
+          branch_new: ${{dev}}
+      - name: Trigger deploy if version changed
+        if: steps.id1.outputs.is_version_changed && github.event_name == 'push'
+        uses: garronej/github-actions-toolkit@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+        with:
+          action_name: dispatch_event
+          owner: ${{github.repository_owner}}
+          repo: ${{github.repository.name}}
+          event_type: deploy
 ```
 
-Run the tests :heavy_check_mark:  
-```bash
-$ npm test
-
- PASS  ./index.test.js
-  ✓ throws invalid number (3ms)
-  ✓ wait 500 ms (504ms)
-  ✓ test runs (95ms)
-
-...
-```
-
-## Change action.yml
-
-The action.yml contains defines the inputs and output for your action.
-
-Update the action.yml with your name, description, inputs and outputs for your action.
-
-See the [documentation](https://help.github.com/en/articles/metadata-syntax-for-github-actions)

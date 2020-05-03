@@ -1,17 +1,18 @@
 {
-  "name": "denoify_kickstart_action",
+  "name": "github-actions-toolkit",
   "version": "0.0.1",
   "private": true,
-  "description": "Actions for denoify_kickstart template",
+  "description": "A collection of github actions to complex to be done in yaml",
   "main": "lib/main.js",
   "scripts": {
+    "generate-action-yml": "node lib/bin/generateActionYml.js",
     "tsc": "npx tsc",
     "pack": "ncc build",
-    "build": "npm run tsc && npm run pack"
+    "build": "npm run tsc && npm run generate-action-yml && npm run pack"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/garronej/denoify_kickstart_action.git"
+    "url": "git+https://github.com/garronej/github-actions-toolkit.git"
   },
   "author": "u/garronej",
   "license": "MIT",
