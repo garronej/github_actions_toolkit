@@ -1,5 +1,5 @@
-name: 'github-actions-toolkit'
-description: 'A collection of github actions to complex to be done in yaml'
+name: 'github_actions_toolkit'
+description: 'A collection of github actions'
 author: 'u/garronej'
 inputs:
   action_name:

@@ -1,8 +1,8 @@
 {
-  "name": "github-actions-toolkit",
+  "name": "github_actions_toolkit",
   "version": "0.0.1",
   "private": true,
-  "description": "A collection of github actions to complex to be done in yaml",
+  "description": "A collection of github actions",
   "main": "lib/main.js",
   "scripts": {
     "generate-action-yml": "node lib/bin/generateActionYml.js",
