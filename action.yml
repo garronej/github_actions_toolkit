@@ -4,7 +4,7 @@ author: 'u/garronej'
 inputs:
   action_name:
     required: true
-    description: 'Action to run, one of: "is_version_changed", "dispatch_event"'
+    description: 'Action to run, one of: "get_package_json_version", "dispatch_event", "update_changelog"'
   owner:
     required: false
     description: 'Repository owner, example: ''garronej'', github.repository_owner'
@@ -17,15 +17,21 @@ inputs:
   client_payload_json:
     required: false
     description: 'Example ''{"p":"foo"}'' see: https://developer.github.com/v3/repos/#create-a-repository-dispatch-event'
-  branch_current:
+  branch:
+    required: false
+    description: 'Example: master'
+  branch_behind:
     required: false
     description: 'Name of a branch, example: ''master'''
-  branch_new:
+  branch_ahead:
     required: false
     description: 'Name of a branch, example: ''dev'''
+  commit_author_name:
+    required: false
+    description: 'Name of the bot that will author the commit for updating the CHANGELOG.md file, ex: action (email will be action@github.com)'
 outputs:
-  is_version_changed:
-    description: '''true'' if version changed ''false'' otherwise'
+  version:
+    description: 'Output of get_package_json_version'
 runs:
   using: 'node12'
   main: 'dist/index.js'

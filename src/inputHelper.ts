@@ -7,13 +7,16 @@ export const inputNames = [
     "repo",
     "event_type",
     "client_payload_json",
-    "branch_current",
-    "branch_new"
+    "branch",
+    "branch_behind",
+    "branch_ahead",
+    "commit_author_name",
 ] as const;
 
 export const availableActions = [
-    "is_version_changed",
-    "dispatch_event"
+    "get_package_json_version",
+    "dispatch_event",
+    "update_changelog"
 ] as const;
 
 
@@ -24,8 +27,10 @@ export function getInputDescription(inputName: typeof inputNames[number]): strin
         case "repo": return "Repository name, example: 'evt', github.repository.name";
         case "event_type": return "see: https://developer.github.com/v3/repos/#create-a-repository-dispatch-event"
         case "client_payload_json": return "Example '{\"p\":\"foo\"}' see: https://developer.github.com/v3/repos/#create-a-repository-dispatch-event"
-        case "branch_current": return "Name of a branch, example: 'master'";
-        case "branch_new": return "Name of a branch, example: 'dev'";
+        case "branch": return "Example: master";
+        case "branch_behind": return "Name of a branch, example: 'master'";
+        case "branch_ahead": return "Name of a branch, example: 'dev'";
+        case "commit_author_name": return "Name of the bot that will author the commit for updating the CHANGELOG.md file, ex: action (email will be action@github.com)"
     }
 }
 
