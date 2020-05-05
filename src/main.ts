@@ -1,6 +1,7 @@
 import * as core from '@actions/core'
 import * as get_package_json_version from "./get_package_json_version";
 import * as dispatch_event from "./dispatch_event";
+import * as sync_package_and_package_lock_version from "./sync_package_and_package_lock_version";
 import { getActionName } from "./inputHelper";
 import * as update_changelog from "./update_changelog";
 
@@ -28,6 +29,13 @@ async function run(): Promise<void> {
         await update_changelog.action(
           action_name,
           update_changelog.getActionParams(),
+          core
+        );
+        return;
+    case "sync_package_and_package_lock_version":
+        await sync_package_and_package_lock_version.action(
+          action_name,
+          sync_package_and_package_lock_version.getActionParams(),
           core
         );
         return;

@@ -10,27 +10,51 @@ export const inputNames = [
     "branch",
     "branch_behind",
     "branch_ahead",
-    "commit_author_name",
+    "commit_author_email",
+    "exclude_commit_from_author_names_json"
 ] as const;
 
 export const availableActions = [
     "get_package_json_version",
     "dispatch_event",
-    "update_changelog"
+    "update_changelog",
+    "sync_package_and_package_lock_version"
 ] as const;
 
 
 export function getInputDescription(inputName: typeof inputNames[number]): string {
     switch(inputName){
-        case "action_name": return `Action to run, one of: ${availableActions.map(s=>`"${s}"`).join(", ")}`;
-        case "owner": return "Repository owner, example: 'garronej', github.repository_owner";
-        case "repo": return "Repository name, example: 'evt', github.repository.name";
-        case "event_type": return "see: https://developer.github.com/v3/repos/#create-a-repository-dispatch-event"
-        case "client_payload_json": return "Example '{\"p\":\"foo\"}' see: https://developer.github.com/v3/repos/#create-a-repository-dispatch-event"
+        case "action_name": return [
+            `Action to run, one of: `,
+            availableActions.map(s=>`"${s}"`).join(", ")
+        ].join("");
+        case "owner": return [ 
+            "Repository owner, example: 'garronej',",
+            "github.repository_owner" 
+        ].join("");
+        case "repo": return [
+            "Repository name, example: ",
+            "'evt', github.repository.name" 
+        ].join("");
+        case "event_type": return [ 
+            "see: https://developer.github.com/v3/",
+            "repos/#create-a-repository-dispatch-event"
+        ].join("");
+        case "client_payload_json": return [ 
+            "Example '{\"p\":\"foo\"}' see: https://developer.github.com/v3/",
+            "repos/#create-a-repository-dispatch-event" 
+        ].join("");
         case "branch": return "Example: master";
         case "branch_behind": return "Name of a branch, example: 'master'";
         case "branch_ahead": return "Name of a branch, example: 'dev'";
-        case "commit_author_name": return "Name of the bot that will author the commit for updating the CHANGELOG.md file, ex: action (email will be action@github.com)"
+        case "commit_author_email": return [ 
+            "Email id  of the bot that will author the commit for ",
+            "updating the CHANGELOG.md file, ex: denoify_ci@github.com" 
+        ].join("");
+        case "exclude_commit_from_author_names_json": return [
+            "For update_changelog, do not includes commit from user ", 
+            `certain committer in the CHANGELOG.md, ex: '["denoify_ci"]'`
+        ].join("");
     }
 }
 

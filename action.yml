@@ -4,10 +4,10 @@ author: 'u/garronej'
 inputs:
   action_name:
     required: true
-    description: 'Action to run, one of: "get_package_json_version", "dispatch_event", "update_changelog"'
+    description: 'Action to run, one of: "get_package_json_version", "dispatch_event", "update_changelog", "sync_package_and_package_lock_version"'
   owner:
     required: false
-    description: 'Repository owner, example: ''garronej'', github.repository_owner'
+    description: 'Repository owner, example: ''garronej'',github.repository_owner'
   repo:
     required: false
     description: 'Repository name, example: ''evt'', github.repository.name'
@@ -26,9 +26,12 @@ inputs:
   branch_ahead:
     required: false
     description: 'Name of a branch, example: ''dev'''
-  commit_author_name:
+  commit_author_email:
     required: false
-    description: 'Name of the bot that will author the commit for updating the CHANGELOG.md file, ex: action (email will be action@github.com)'
+    description: 'Email id  of the bot that will author the commit for updating the CHANGELOG.md file, ex: denoify_ci@github.com'
+  exclude_commit_from_author_names_json:
+    required: false
+    description: 'For update_changelog, do not includes commit from user certain committer in the CHANGELOG.md, ex: ''["denoify_ci"]'''
 outputs:
   version:
     description: 'Output of get_package_json_version'

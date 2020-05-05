@@ -6,7 +6,8 @@ action("update_changelog", {
     "repo": "test-repo",
     "branch_behind": "master",
     "branch_ahead": "dev",
-    "commit_author_name": "action"
+    "commit_author_email": "denoify_ci@github.com",
+    "exclude_commit_from_author_names_json": JSON.stringify([])
 },
     { "debug": console.log }
 );

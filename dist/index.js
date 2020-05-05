@@ -812,6 +812,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(__webpack_require__(470));
 const get_package_json_version = __importStar(__webpack_require__(43));
 const dispatch_event = __importStar(__webpack_require__(863));
+const sync_package_and_package_lock_version = __importStar(__webpack_require__(830));
 const inputHelper_1 = __webpack_require__(649);
 const update_changelog = __importStar(__webpack_require__(702));
 function run() {
@@ -826,6 +827,9 @@ function run() {
                 return;
             case "update_changelog":
                 yield update_changelog.action(action_name, update_changelog.getActionParams(), core);
+                return;
+            case "sync_package_and_package_lock_version":
+                yield sync_package_and_package_lock_version.action(action_name, sync_package_and_package_lock_version.getActionParams(), core);
                 return;
         }
         throw new Error(`${action_name} Not supported`);
@@ -7987,24 +7991,48 @@ exports.inputNames = [
     "branch",
     "branch_behind",
     "branch_ahead",
-    "commit_author_name",
+    "commit_author_email",
+    "exclude_commit_from_author_names_json"
 ];
 exports.availableActions = [
     "get_package_json_version",
     "dispatch_event",
-    "update_changelog"
+    "update_changelog",
+    "sync_package_and_package_lock_version"
 ];
 function getInputDescription(inputName) {
     switch (inputName) {
-        case "action_name": return `Action to run, one of: ${exports.availableActions.map(s => `"${s}"`).join(", ")}`;
-        case "owner": return "Repository owner, example: 'garronej', github.repository_owner";
-        case "repo": return "Repository name, example: 'evt', github.repository.name";
-        case "event_type": return "see: https://developer.github.com/v3/repos/#create-a-repository-dispatch-event";
-        case "client_payload_json": return "Example '{\"p\":\"foo\"}' see: https://developer.github.com/v3/repos/#create-a-repository-dispatch-event";
+        case "action_name": return [
+            `Action to run, one of: `,
+            exports.availableActions.map(s => `"${s}"`).join(", ")
+        ].join("");
+        case "owner": return [
+            "Repository owner, example: 'garronej',",
+            "github.repository_owner"
+        ].join("");
+        case "repo": return [
+            "Repository name, example: ",
+            "'evt', github.repository.name"
+        ].join("");
+        case "event_type": return [
+            "see: https://developer.github.com/v3/",
+            "repos/#create-a-repository-dispatch-event"
+        ].join("");
+        case "client_payload_json": return [
+            "Example '{\"p\":\"foo\"}' see: https://developer.github.com/v3/",
+            "repos/#create-a-repository-dispatch-event"
+        ].join("");
         case "branch": return "Example: master";
         case "branch_behind": return "Name of a branch, example: 'master'";
         case "branch_ahead": return "Name of a branch, example: 'dev'";
-        case "commit_author_name": return "Name of the bot that will author the commit for updating the CHANGELOG.md file, ex: action (email will be action@github.com)";
+        case "commit_author_email": return [
+            "Email id  of the bot that will author the commit for ",
+            "updating the CHANGELOG.md file, ex: denoify_ci@github.com"
+        ].join("");
+        case "exclude_commit_from_author_names_json": return [
+            "For update_changelog, do not includes commit from user ",
+            `certain committer in the CHANGELOG.md, ex: '["denoify_ci"]'`
+        ].join("");
     }
 }
 exports.getInputDescription = getInputDescription;
@@ -8328,12 +8356,14 @@ exports.getActionParams = inputHelper_1.getActionParamsFactory({
         "repo",
         "branch_behind",
         "branch_ahead",
-        "commit_author_name"
+        "commit_author_email",
+        "exclude_commit_from_author_names_json"
     ]
 }).getActionParams;
 function action(_actionName, params, core) {
     return __awaiter(this, void 0, void 0, function* () {
-        const { owner, repo, branch_ahead, branch_behind, commit_author_name } = params;
+        const { owner, repo, branch_ahead, branch_behind, commit_author_email } = params;
+        const exclude_commit_from_author_names = JSON.parse(params.exclude_commit_from_author_names_json);
         const octokit = new rest_1.Octokit();
         const { getChangeLog } = getChangeLog_1.getChangeLogFactory({ octokit });
         const { commits } = yield getChangeLog({
@@ -8364,13 +8394,14 @@ function action(_actionName, params, core) {
             "version": branchAheadVersion,
             bumpType,
             "body": commits
+                .filter(({ commit }) => !exclude_commit_from_author_names.includes(commit.author.name))
                 .map(({ commit }) => `- ${commit.message}  `)
                 .join("\n")
         });
         core.debug(`CHANGELOG.md: ${changelogRaw}`);
         fs.writeFileSync("CHANGELOG.md", Buffer.from(changelogRaw, "utf8"));
-        yield st.exec(`git config --local user.email "${commit_author_name}@github.com"`);
-        yield st.exec(`git config --local user.name "${commit_author_name}"`);
+        yield st.exec(`git config --local user.email "${commit_author_email}`);
+        yield st.exec(`git config --local user.name "${commit_author_email.split("@")[0]}"`);
         yield st.exec(`git add -A`);
         yield st.exec(`git commit -am "Update changelog v${branchAheadVersion}"`);
         yield st.exec(`git push`);
@@ -9088,6 +9119,71 @@ function isexe (path, options, cb) {
 function sync (path, options) {
   return checkStat(fs.statSync(path), path, options)
 }
+
+
+/***/ }),
+
+/***/ 830:
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const inputHelper_1 = __webpack_require__(649);
+const st = __importStar(__webpack_require__(425));
+const fs = __importStar(__webpack_require__(747));
+exports.getActionParams = inputHelper_1.getActionParamsFactory({
+    "inputNameSubset": [
+        "owner",
+        "repo",
+        "branch",
+        "commit_author_email"
+    ]
+}).getActionParams;
+function action(_actionName, params, core) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const { owner, repo, branch, commit_author_email } = params;
+        yield st.exec(`git clone https://github.com/${owner}/${repo}`);
+        process.chdir(repo);
+        yield st.exec(`git checkout ${branch}`);
+        const { version } = JSON.parse(fs.readFileSync("package.json")
+            .toString("utf8"));
+        if (!fs.existsSync("package-lock.json")) {
+            core.debug(`No package-lock.json tracked by ${owner}/${repo}#${branch}`);
+            return;
+        }
+        const packageLockJsonParsed = JSON.parse(fs.readFileSync("package-lock.json")
+            .toString("utf8"));
+        if (packageLockJsonParsed.version === version) {
+            core.debug("Nothing to do, version in package.json and package-lock.json are the same");
+        }
+        fs.writeFileSync("package-lock.json", Buffer.from(JSON.stringify((() => {
+            packageLockJsonParsed.version = version;
+            return packageLockJsonParsed;
+        })()), "utf8"));
+        yield st.exec(`git config --local user.email "${commit_author_email}"`);
+        yield st.exec(`git config --local user.name "${commit_author_email.split("@")[0]}"`);
+        yield st.exec(`git commit -am "Sync package.json and package.lock version"`);
+        yield st.exec(`git push`);
+    });
+}
+exports.action = action;
 
 
 /***/ }),

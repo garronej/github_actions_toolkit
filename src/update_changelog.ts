@@ -14,7 +14,8 @@ export const { getActionParams } = getActionParamsFactory({
         "repo",
         "branch_behind",
         "branch_ahead",
-        "commit_author_name"
+        "commit_author_email",
+        "exclude_commit_from_author_names_json"
     ] as const
 });
 
@@ -30,9 +31,17 @@ export async function action(
     core: CoreLike
 ) {
 
-    const { owner, repo, branch_ahead, branch_behind, commit_author_name } = params;
+    const { 
+        owner, 
+        repo, 
+        branch_ahead, 
+        branch_behind, 
+        commit_author_email
+    } = params;
 
-
+    const exclude_commit_from_author_names: string[]= 
+        JSON.parse(params.exclude_commit_from_author_names_json)
+        ;
 
     const octokit = new Octokit();
 
@@ -88,6 +97,7 @@ export async function action(
         "version": branchAheadVersion,
         bumpType,
         "body": commits
+            .filter(({ commit })=> !exclude_commit_from_author_names.includes(commit.author.name))
             .map(({ commit }) => `- ${commit.message}  `)
             .join("\n")
     });
@@ -101,8 +111,8 @@ export async function action(
         Buffer.from(changelogRaw, "utf8")
     );
 
-    await st.exec(`git config --local user.email "${commit_author_name}@github.com"`);
-    await st.exec(`git config --local user.name "${commit_author_name}"`);
+    await st.exec(`git config --local user.email "${commit_author_email}`);
+    await st.exec(`git config --local user.name "${commit_author_email.split("@")[0]}"`);
     await st.exec(`git add -A`);
     await st.exec(`git commit -am "Update changelog v${branchAheadVersion}"`);
     await st.exec(`git push`);
