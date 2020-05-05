@@ -34,7 +34,7 @@ export function getInputDescription(inputName: typeof inputNames[number]): strin
         ].join("");
         case "repo": return [
             "Repository name, example: ",
-            "'evt', github.repository.name" 
+            "'evt', github.event.repository.name" 
         ].join("");
         case "event_type": return [ 
             "see: https://developer.github.com/v3/",

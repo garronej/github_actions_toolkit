@@ -10,7 +10,7 @@ inputs:
     description: 'Repository owner, example: ''garronej'',github.repository_owner'
   repo:
     required: false
-    description: 'Repository name, example: ''evt'', github.repository.name'
+    description: 'Repository name, example: ''evt'', github.event.repository.name'
   event_type:
     required: false
     description: 'see: https://developer.github.com/v3/repos/#create-a-repository-dispatch-event'
