@@ -1,5 +1,5 @@
-import { Octokit } from "@octokit/rest";
 import { getActionParamsFactory } from "./inputHelper";
+import { createOctokit } from "./tools/createOctokit";
 
 export const { getActionParams } = getActionParamsFactory({
     "inputNameSubset": [
@@ -23,31 +23,22 @@ export async function action(
     core: CoreLike
 ) {
 
-    core.debug(JSON.stringify({ _actionName, params }));
-
     const { owner, repo, event_type, client_payload_json } = params;
 
-    const octokit = new Octokit();
+    core.debug(JSON.stringify({ _actionName, params }));
 
-    try {
+    const octokit = createOctokit();
 
-        await octokit.repos.createDispatchEvent({
-            owner,
-            repo,
-            event_type,
-            ...(!!client_payload_json ?
-                { "client_payload": JSON.parse(client_payload_json) } :
-                {}
-            )
-        });
+    await octokit.repos.createDispatchEvent({
+        owner,
+        repo,
+        event_type,
+        ...(!!client_payload_json ?
+            { "client_payload": JSON.parse(client_payload_json) } :
+            {}
+        )
+    });
 
-    } catch (error) {
-
-        core.debug(`=============> error: ${error.message}`);
-
-        throw error;
-
-    }
 
 
 }

@@ -1,6 +1,7 @@
 
-import type { Octokit } from "@octokit/rest";
 import type { AsyncReturnType } from "evt/dist/tools/typeSafety/AsyncReturnType";
+import type { Octokit } from "@octokit/rest";
+
 
 /*
 .sha

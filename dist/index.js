@@ -8345,11 +8345,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const inputHelper_1 = __webpack_require__(649);
 const st = __importStar(__webpack_require__(425));
 const getChangeLog_1 = __webpack_require__(962);
-const rest_1 = __webpack_require__(889);
 const get_package_json_version = __importStar(__webpack_require__(43));
 const fs = __importStar(__webpack_require__(747));
 const NpmModuleVersion_1 = __webpack_require__(395);
 const typeSafety_1 = __webpack_require__(601);
+const createOctokit_1 = __webpack_require__(906);
 exports.getActionParams = inputHelper_1.getActionParamsFactory({
     "inputNameSubset": [
         "owner",
@@ -8364,7 +8364,7 @@ function action(_actionName, params, core) {
     return __awaiter(this, void 0, void 0, function* () {
         const { owner, repo, branch_ahead, branch_behind, commit_author_email } = params;
         const exclude_commit_from_author_names = JSON.parse(params.exclude_commit_from_author_names_json);
-        const octokit = new rest_1.Octokit();
+        const octokit = createOctokit_1.createOctokit();
         const { getChangeLog } = getChangeLog_1.getChangeLogFactory({ octokit });
         const { commits } = yield getChangeLog({
             owner,
@@ -10536,8 +10536,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const rest_1 = __webpack_require__(889);
 const inputHelper_1 = __webpack_require__(649);
+const createOctokit_1 = __webpack_require__(906);
 exports.getActionParams = inputHelper_1.getActionParamsFactory({
     "inputNameSubset": [
         "owner",
@@ -10548,20 +10548,14 @@ exports.getActionParams = inputHelper_1.getActionParamsFactory({
 }).getActionParams;
 function action(_actionName, params, core) {
     return __awaiter(this, void 0, void 0, function* () {
-        core.debug(JSON.stringify({ _actionName, params }));
         const { owner, repo, event_type, client_payload_json } = params;
-        const octokit = new rest_1.Octokit();
-        try {
-            yield octokit.repos.createDispatchEvent(Object.assign({ owner,
-                repo,
-                event_type }, (!!client_payload_json ?
-                { "client_payload": JSON.parse(client_payload_json) } :
-                {})));
-        }
-        catch (error) {
-            core.debug(`=============> error: ${error.message}`);
-            throw error;
-        }
+        core.debug(JSON.stringify({ _actionName, params }));
+        const octokit = createOctokit_1.createOctokit();
+        yield octokit.repos.createDispatchEvent(Object.assign({ owner,
+            repo,
+            event_type }, (!!client_payload_json ?
+            { "client_payload": JSON.parse(client_payload_json) } :
+            {})));
     });
 }
 exports.action = action;
@@ -10777,6 +10771,23 @@ function withCustomRequest(customRequest) {
 exports.graphql = graphql$1;
 exports.withCustomRequest = withCustomRequest;
 //# sourceMappingURL=index.js.map
+
+
+/***/ }),
+
+/***/ 906:
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const rest_1 = __webpack_require__(889);
+/** Instantiate an Octokit with auth from $GITHUB_TOKEN in env */
+function createOctokit() {
+    const auth = process.env["GITHUB_TOKEN"];
+    return new rest_1.Octokit(Object.assign({}, (!!auth ? { auth } : {})));
+}
+exports.createOctokit = createOctokit;
 
 
 /***/ }),

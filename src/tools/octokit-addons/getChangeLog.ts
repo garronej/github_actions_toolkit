@@ -1,8 +1,8 @@
 
-import type { Octokit } from "@octokit/rest";
 import { getCommonOriginFactory } from "./getCommonOrigin";
 import { listCommitFactory } from "./listCommit";
 import type { Commit } from "./getCommitAsyncIterable";
+import type { Octokit } from "@octokit/rest";
 
 /** Take two branch that have a common origin and list all the 
  * commit that have been made on the branch that is ahead since it

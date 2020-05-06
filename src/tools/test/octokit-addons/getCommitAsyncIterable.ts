@@ -1,11 +1,11 @@
 
-import { Octokit } from "@octokit/rest";
 import { getCommitAsyncIterableFactory } from "../../octokit-addons/getCommitAsyncIterable";
+import { createOctokit } from "../../createOctokit";
 
 
 (async function () {
 
-    const octokit = new Octokit();
+    const octokit = createOctokit();
 
     const { getCommitAsyncIterable } = getCommitAsyncIterableFactory({ octokit });
 

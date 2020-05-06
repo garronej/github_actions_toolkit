@@ -2,11 +2,11 @@
 import { getActionParamsFactory } from "./inputHelper";
 import * as st from "scripting-tools";
 import { getChangeLogFactory } from "./tools/octokit-addons/getChangeLog";
-import { Octokit } from "@octokit/rest";
 import * as get_package_json_version from "./get_package_json_version";
 import * as fs from "fs";
 import { NpmModuleVersion } from "./tools/NpmModuleVersion";
 import { assert } from "evt/dist/tools/typeSafety";
+import { createOctokit } from "./tools/createOctokit";
 
 export const { getActionParams } = getActionParamsFactory({
     "inputNameSubset": [
@@ -43,7 +43,7 @@ export async function action(
         JSON.parse(params.exclude_commit_from_author_names_json)
         ;
 
-    const octokit = new Octokit();
+    const octokit = createOctokit();
 
     const { getChangeLog } = getChangeLogFactory({ octokit });
 

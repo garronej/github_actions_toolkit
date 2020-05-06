@@ -1,10 +1,10 @@
 
 import { listCommitFactory } from "../../octokit-addons/listCommit";
-import { Octokit } from "@octokit/rest";
+import { createOctokit } from "../../createOctokit";
 
 (async ()=>{
 
-    const octokit = new Octokit();
+    const octokit = createOctokit();
 
 
     const { listCommit } = listCommitFactory({ octokit });

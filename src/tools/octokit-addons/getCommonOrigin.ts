@@ -1,6 +1,6 @@
 
-import type { Octokit } from "@octokit/rest";
 import { getCommitAsyncIterableFactory } from "./getCommitAsyncIterable";
+import type { Octokit } from "@octokit/rest";
 
 /** Return the sha of the first common commit between two branches */
 export function getCommonOriginFactory(params: { octokit: Octokit; }) {
