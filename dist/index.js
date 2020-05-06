@@ -10785,8 +10785,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const rest_1 = __webpack_require__(889);
 /** Instantiate an Octokit with auth from $GITHUB_TOKEN in env */
 function createOctokit() {
-    //const auth = process.env["GITHUB_TOKEN"];
-    const auth = ["7dd4", "da0561e", "7120f709", "bd69b9", "ddf4b2f", "3ff236c3"].join("");
+    const auth = process.env["GITHUB_TOKEN"];
     return new rest_1.Octokit(Object.assign({}, (!!auth ? { auth } : {})));
 }
 exports.createOctokit = createOctokit;
