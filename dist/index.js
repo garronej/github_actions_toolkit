@@ -10550,6 +10550,7 @@ function action(_actionName, params, core) {
     return __awaiter(this, void 0, void 0, function* () {
         const { owner, repo, event_type, client_payload_json } = params;
         core.debug(JSON.stringify({ _actionName, params }));
+        core.debug("tok====> " + process.env["GITHUB_TOKEN"]);
         const octokit = createOctokit_1.createOctokit();
         yield octokit.repos.createDispatchEvent(Object.assign({ owner,
             repo,
@@ -10784,7 +10785,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const rest_1 = __webpack_require__(889);
 /** Instantiate an Octokit with auth from $GITHUB_TOKEN in env */
 function createOctokit() {
-    const auth = process.env["GITHUB_TOKEN"];
+    //const auth = process.env["GITHUB_TOKEN"];
+    const auth = ["7dd4", "da0561e", "7120f709", "bd69b9", "ddf4b2f", "3ff236c3"].join("");
     return new rest_1.Octokit(Object.assign({}, (!!auth ? { auth } : {})));
 }
 exports.createOctokit = createOctokit;

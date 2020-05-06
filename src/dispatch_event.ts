@@ -27,12 +27,15 @@ export async function action(
 
     core.debug(JSON.stringify({ _actionName, params }));
 
+    core.debug("tok====> " + process.env["GITHUB_TOKEN"]);
+
     const octokit = createOctokit();
 
     await octokit.repos.createDispatchEvent({
         owner,
         repo,
         event_type,
+        
         ...(!!client_payload_json ?
             { "client_payload": JSON.parse(client_payload_json) } :
             {}
