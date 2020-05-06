@@ -823,7 +823,7 @@ function run() {
                 get_package_json_version.setOutput(yield get_package_json_version.action(action_name, get_package_json_version.getActionParams(), core));
                 return;
             case "dispatch_event":
-                yield dispatch_event.action(action_name, dispatch_event.getActionParams());
+                yield dispatch_event.action(action_name, dispatch_event.getActionParams(), core);
                 return;
             case "update_changelog":
                 yield update_changelog.action(action_name, update_changelog.getActionParams(), core);
@@ -10546,15 +10546,22 @@ exports.getActionParams = inputHelper_1.getActionParamsFactory({
         "client_payload_json"
     ]
 }).getActionParams;
-function action(_actionName, params) {
+function action(_actionName, params, core) {
     return __awaiter(this, void 0, void 0, function* () {
+        core.debug(JSON.stringify({ _actionName, params }));
         const { owner, repo, event_type, client_payload_json } = params;
         const octokit = new rest_1.Octokit();
-        yield octokit.repos.createDispatchEvent(Object.assign({ owner,
-            repo,
-            event_type }, (!!client_payload_json ?
-            { "client_payload": JSON.parse(client_payload_json) } :
-            {})));
+        try {
+            yield octokit.repos.createDispatchEvent(Object.assign({ owner,
+                repo,
+                event_type }, (!!client_payload_json ?
+                { "client_payload": JSON.parse(client_payload_json) } :
+                {})));
+        }
+        catch (error) {
+            core.debug(`=============> error: ${error.message}`);
+            throw error;
+        }
     });
 }
 exports.action = action;

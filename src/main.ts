@@ -22,7 +22,8 @@ async function run(): Promise<void> {
     case "dispatch_event":
       await dispatch_event.action(
         action_name,
-        dispatch_event.getActionParams()
+        dispatch_event.getActionParams(),
+        core
       );
       return;
     case "update_changelog": 
