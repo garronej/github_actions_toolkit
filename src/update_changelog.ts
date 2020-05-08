@@ -39,6 +39,8 @@ export async function action(
         commit_author_email
     } = params;
 
+    core.debug(`params: ${JSON.stringify(params)}`);
+
     const exclude_commit_from_author_names: string[]= 
         JSON.parse(params.exclude_commit_from_author_names_json)
         ;
