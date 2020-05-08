@@ -8363,6 +8363,7 @@ exports.getActionParams = inputHelper_1.getActionParamsFactory({
 function action(_actionName, params, core) {
     return __awaiter(this, void 0, void 0, function* () {
         const { owner, repo, branch_ahead, branch_behind, commit_author_email } = params;
+        core.debug(`params: ${JSON.stringify(params)}`);
         const exclude_commit_from_author_names = JSON.parse(params.exclude_commit_from_author_names_json);
         const octokit = createOctokit_1.createOctokit();
         const { getChangeLog } = getChangeLog_1.getChangeLogFactory({ octokit });
