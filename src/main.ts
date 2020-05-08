@@ -7,6 +7,8 @@ import * as update_changelog from "./update_changelog";
 
 async function run(): Promise<void> {
 
+  core.debug("Hey the text");
+
   const action_name = getActionName();
 
   switch (action_name) {
