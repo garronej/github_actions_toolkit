@@ -9173,6 +9173,7 @@ function action(_actionName, params, core) {
             .toString("utf8"));
         if (packageLockJsonParsed.version === version) {
             core.debug("Nothing to do, version in package.json and package-lock.json are the same");
+            return;
         }
         fs.writeFileSync("package-lock.json", Buffer.from(JSON.stringify((() => {
             packageLockJsonParsed.version = version;

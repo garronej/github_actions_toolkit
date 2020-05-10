@@ -31,7 +31,6 @@ export async function action(
 
     await st.exec(`git checkout ${branch}`);
 
-
     const { version } = JSON.parse(
         fs.readFileSync("package.json")
             .toString("utf8")
@@ -49,6 +48,7 @@ export async function action(
 
     if (packageLockJsonParsed.version === version) {
         core.debug("Nothing to do, version in package.json and package-lock.json are the same");
+        return;
     }
 
     fs.writeFileSync(
