@@ -44,9 +44,9 @@ export function getInputDescription(inputName: typeof inputNames[number]): strin
             "Example '{\"p\":\"foo\"}' see: https://developer.github.com/v3/",
             "repos/#create-a-repository-dispatch-event" 
         ].join("");
-        case "branch": return "Example: master";
-        case "branch_behind": return "Name of a branch, example: 'master'";
-        case "branch_ahead": return "Name of a branch, example: 'dev'";
+        case "branch": return "Example: master ( can also be a sha )";
+        case "branch_behind": return "Name of a branch, example: 'master' ( can also be an sha )";
+        case "branch_ahead": return "Name of a branch, example: 'dev' ( can also be an sha )";
         case "commit_author_email": return [ 
             "Email id  of the bot that will author the commit for ",
             "updating the CHANGELOG.md file, ex: denoify_ci@github.com" 

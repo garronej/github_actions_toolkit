@@ -19,13 +19,13 @@ inputs:
     description: 'Example ''{"p":"foo"}'' see: https://developer.github.com/v3/repos/#create-a-repository-dispatch-event'
   branch:
     required: false
-    description: 'Example: master'
+    description: 'Example: master ( can also be a sha )'
   branch_behind:
     required: false
-    description: 'Name of a branch, example: ''master'''
+    description: 'Name of a branch, example: ''master'' ( can also be an sha )'
   branch_ahead:
     required: false
-    description: 'Name of a branch, example: ''dev'''
+    description: 'Name of a branch, example: ''dev'' ( can also be an sha )'
   commit_author_email:
     required: false
     description: 'Email id  of the bot that will author the commit for updating the CHANGELOG.md file, ex: denoify_ci@github.com'
