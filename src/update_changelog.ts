@@ -113,7 +113,7 @@ export async function action(
         Buffer.from(changelogRaw, "utf8")
     );
 
-    await st.exec(`git config --local user.email "${commit_author_email}`);
+    await st.exec(`git config --local user.email "${commit_author_email}"`);
     await st.exec(`git config --local user.name "${commit_author_email.split("@")[0]}"`);
     await st.exec(`git add -A`);
     await st.exec(`git commit -am "Update changelog v${branchAheadVersion}"`);

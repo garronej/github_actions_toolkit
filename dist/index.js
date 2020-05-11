@@ -8401,7 +8401,7 @@ function action(_actionName, params, core) {
         });
         core.debug(`CHANGELOG.md: ${changelogRaw}`);
         fs.writeFileSync("CHANGELOG.md", Buffer.from(changelogRaw, "utf8"));
-        yield st.exec(`git config --local user.email "${commit_author_email}`);
+        yield st.exec(`git config --local user.email "${commit_author_email}"`);
         yield st.exec(`git config --local user.name "${commit_author_email.split("@")[0]}"`);
         yield st.exec(`git add -A`);
         yield st.exec(`git commit -am "Update changelog v${branchAheadVersion}"`);
