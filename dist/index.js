@@ -9159,6 +9159,7 @@ exports.getActionParams = inputHelper_1.getActionParamsFactory({
 }).getActionParams;
 function action(_actionName, params, core) {
     return __awaiter(this, void 0, void 0, function* () {
+        core.debug(JSON.stringify(params));
         const { owner, repo, branch, commit_author_email } = params;
         yield st.exec(`git clone https://github.com/${owner}/${repo}`);
         process.chdir(repo);
@@ -9178,7 +9179,7 @@ function action(_actionName, params, core) {
         fs.writeFileSync("package-lock.json", Buffer.from(JSON.stringify((() => {
             packageLockJsonParsed.version = version;
             return packageLockJsonParsed;
-        })()), "utf8"));
+        })(), null, 2), "utf8"));
         yield st.exec(`git config --local user.email "${commit_author_email}"`);
         yield st.exec(`git config --local user.name "${commit_author_email.split("@")[0]}"`);
         yield st.exec(`git commit -am "Sync package.json and package.lock version"`);
@@ -9225,6 +9226,8 @@ const Endpoints = {
     deleteSelfHostedRunnerFromRepo: ["DELETE /repos/{owner}/{repo}/actions/runners/{runner_id}"],
     deleteWorkflowRunLogs: ["DELETE /repos/{owner}/{repo}/actions/runs/{run_id}/logs"],
     downloadArtifact: ["GET /repos/{owner}/{repo}/actions/artifacts/{artifact_id}/{archive_format}"],
+    downloadWorkflowJobLogs: ["GET /repos/{owner}/{repo}/actions/jobs/{job_id}/logs"],
+    downloadWorkflowRunLogs: ["GET /repos/{owner}/{repo}/actions/runs/{run_id}/logs"],
     getArtifact: ["GET /repos/{owner}/{repo}/actions/artifacts/{artifact_id}"],
     getPublicKey: ["GET /repos/{owner}/{repo}/actions/secrets/public-key"],
     getSecret: ["GET /repos/{owner}/{repo}/actions/secrets/{name}"],
@@ -9248,9 +9251,13 @@ const Endpoints = {
     listSecretsForRepo: ["GET /repos/{owner}/{repo}/actions/secrets"],
     listSelfHostedRunnersForOrg: ["GET /orgs/{org}/actions/runners"],
     listSelfHostedRunnersForRepo: ["GET /repos/{owner}/{repo}/actions/runners"],
-    listWorkflowJobLogs: ["GET /repos/{owner}/{repo}/actions/jobs/{job_id}/logs"],
+    listWorkflowJobLogs: ["GET /repos/{owner}/{repo}/actions/jobs/{job_id}/logs", {}, {
+      renamed: ["actions", "downloadWorkflowJobLogs"]
+    }],
     listWorkflowRunArtifacts: ["GET /repos/{owner}/{repo}/actions/runs/{run_id}/artifacts"],
-    listWorkflowRunLogs: ["GET /repos/{owner}/{repo}/actions/runs/{run_id}/logs"],
+    listWorkflowRunLogs: ["GET /repos/{owner}/{repo}/actions/runs/{run_id}/logs", {}, {
+      renamed: ["actions", "downloadWorkflowRunLogs"]
+    }],
     listWorkflowRuns: ["GET /repos/{owner}/{repo}/actions/workflows/{workflow_id}/runs"],
     reRunWorkflow: ["POST /repos/{owner}/{repo}/actions/runs/{run_id}/rerun"],
     removeSelfHostedRunner: ["DELETE /repos/{owner}/{repo}/actions/runners/{runner_id}", {}, {
@@ -9433,7 +9440,9 @@ const Endpoints = {
       }
     }],
     resetToken: ["PATCH /applications/{client_id}/token"],
-    revokeInstallationToken: ["DELETE /installation/token"]
+    revokeInstallationToken: ["DELETE /installation/token"],
+    suspendInstallation: ["PUT /app/installations/{installation_id}/suspended"],
+    unsuspendInstallation: ["DELETE /app/installations/{installation_id}/suspended"]
   },
   checks: {
     create: ["POST /repos/{owner}/{repo}/check-runs", {
@@ -9491,6 +9500,10 @@ const Endpoints = {
         previews: ["antiope"]
       }
     }]
+  },
+  codeScanning: {
+    getAlert: ["GET /repos/{owner}/{repo}/code-scanning/alerts/{alert_id}"],
+    listAlertsForRepo: ["GET /repos/{owner}/{repo}/code-scanning/alerts"]
   },
   codesOfConduct: {
     getAllCodesOfConduct: ["GET /codes_of_conduct", {
@@ -10387,7 +10400,7 @@ const Endpoints = {
   }
 };
 
-const VERSION = "3.8.0";
+const VERSION = "3.10.0";
 
 function endpointsToMethods(octokit, endpointsMap) {
   const newMethods = {};
@@ -10488,36 +10501,6 @@ function restEndpointMethods(octokit) {
 restEndpointMethods.VERSION = VERSION;
 
 exports.restEndpointMethods = restEndpointMethods;
-//# sourceMappingURL=index.js.map
-
-
-/***/ }),
-
-/***/ 862:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, '__esModule', { value: true });
-
-function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
-
-var osName = _interopDefault(__webpack_require__(2));
-
-function getUserAgent() {
-  try {
-    return `Node.js/${process.version.substr(1)} (${osName()}; ${process.arch})`;
-  } catch (error) {
-    if (/wmic os get Caption/.test(error.message)) {
-      return "Windows <version undetectable>";
-    }
-
-    throw error;
-  }
-}
-
-exports.getUserAgent = getUserAgent;
 //# sourceMappingURL=index.js.map
 
 
@@ -10673,7 +10656,7 @@ var pluginRequestLog = __webpack_require__(916);
 var pluginPaginateRest = __webpack_require__(299);
 var pluginRestEndpointMethods = __webpack_require__(842);
 
-const VERSION = "17.6.0";
+const VERSION = "17.8.0";
 
 const Octokit = core.Octokit.plugin(pluginRequestLog.requestLog, pluginRestEndpointMethods.restEndpointMethods, pluginPaginateRest.paginateRest).defaults({
   userAgent: `octokit-rest.js/${VERSION}`
@@ -10694,9 +10677,9 @@ exports.Octokit = Octokit;
 Object.defineProperty(exports, '__esModule', { value: true });
 
 var request = __webpack_require__(753);
-var universalUserAgent = __webpack_require__(862);
+var universalUserAgent = __webpack_require__(796);
 
-const VERSION = "4.3.1";
+const VERSION = "4.4.0";
 
 class GraphqlError extends Error {
   constructor(request, response) {
@@ -10715,7 +10698,7 @@ class GraphqlError extends Error {
 
 }
 
-const NON_VARIABLE_OPTIONS = ["method", "baseUrl", "url", "headers", "request", "query"];
+const NON_VARIABLE_OPTIONS = ["method", "baseUrl", "url", "headers", "request", "query", "mediaType"];
 function graphql(request, query, options) {
   options = typeof query === "string" ? options = Object.assign({
     query

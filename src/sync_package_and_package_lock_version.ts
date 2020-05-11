@@ -23,7 +23,10 @@ export async function action(
     core: CoreLike
 ) {
 
+    core.debug(JSON.stringify(params));
+
     const { owner, repo, branch, commit_author_email } = params;
+
 
     await st.exec(`git clone https://github.com/${owner}/${repo}`);
 
@@ -58,7 +61,9 @@ export async function action(
                 (() => {
                     packageLockJsonParsed.version = version;
                     return packageLockJsonParsed;
-                })()
+                })(),
+                null,
+                2
             ),
             "utf8"
         )
