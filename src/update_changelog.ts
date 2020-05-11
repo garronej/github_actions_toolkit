@@ -7,6 +7,7 @@ import * as fs from "fs";
 import { NpmModuleVersion } from "./tools/NpmModuleVersion";
 import { assert } from "evt/dist/tools/typeSafety";
 import { createOctokit } from "./tools/createOctokit";
+import { gitPush } from "./tools/gitPush";
 
 export const { getActionParams } = getActionParamsFactory({
     "inputNameSubset": [
@@ -117,7 +118,8 @@ export async function action(
     await st.exec(`git config --local user.name "${commit_author_email.split("@")[0]}"`);
     await st.exec(`git add -A`);
     await st.exec(`git commit -am "Update changelog v${branchAheadVersion}"`);
-    await st.exec(`git push`);
+
+    await gitPush({ owner, repo });
 
 }
 

@@ -1,6 +1,7 @@
 import { getActionParamsFactory } from "./inputHelper";
 import * as st from "scripting-tools";
 import * as fs from "fs";
+import { gitPush } from "./tools/gitPush";
 
 export const { getActionParams } = getActionParamsFactory({
     "inputNameSubset": [
@@ -72,6 +73,7 @@ export async function action(
     await st.exec(`git config --local user.email "${commit_author_email}"`);
     await st.exec(`git config --local user.name "${commit_author_email.split("@")[0]}"`);
     await st.exec(`git commit -am "Sync package.json and package.lock version"`);
-    await st.exec(`git push`);
+
+    await gitPush({ owner, repo });
 
 }
