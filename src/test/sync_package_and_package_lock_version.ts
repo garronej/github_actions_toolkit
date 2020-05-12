@@ -7,7 +7,7 @@ import * as st from "scripting-tools";
 
     const cwd = process.cwd();
 
-    const repo = "friendly_memory";
+    const repo = "super_waffle";
 
     await action("sync_package_and_package_lock_version", {
         "owner": "garronej",

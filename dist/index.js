@@ -7702,24 +7702,24 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const st = __importStar(__webpack_require__(425));
-const path = __importStar(__webpack_require__(622));
-const assert_1 = __webpack_require__(970);
 function gitCommit(params) {
     return __awaiter(this, void 0, void 0, function* () {
-        const { owner, repo, addAll, commitMessage, commitAuthorEmail, removeFolderAfterward } = params;
-        yield st.exec(`git config --local user.email "${commitAuthorEmail}"`);
-        yield st.exec(`git config --local user.name "${commitAuthorEmail.split("@")[0]}"`);
-        if (addAll) {
-            yield st.exec(`git add -A`);
+        const { owner, repo, commitAuthorEmail, performChanges } = params;
+        yield st.exec(`git clone https://github.com/${owner}/${repo}`);
+        const cwd = process.cwd();
+        process.chdir(repo);
+        const changesResult = yield performChanges();
+        if (changesResult.commit) {
+            yield st.exec(`git config --local user.email "${commitAuthorEmail}"`);
+            yield st.exec(`git config --local user.name "${commitAuthorEmail.split("@")[0]}"`);
+            if (changesResult.addAll) {
+                yield st.exec(`git add -A`);
+            }
+            yield st.exec(`git commit -am "${changesResult.message}"`);
+            yield st.exec(`git push "https://${owner}:${process.env["GITHUB_TOKEN"]}@github.com/${owner}/${repo}.git"`);
         }
-        yield st.exec(`git commit -am "${commitMessage}"`);
-        yield st.exec(`git push "https://${owner}:${process.env["GITHUB_TOKEN"]}@github.com/${owner}/${repo}.git"`);
-        if (removeFolderAfterward) {
-            const cwd = process.cwd();
-            assert_1.assert(path.basename(cwd) === repo, `We should be in a repository named ${repo}`);
-            process.chdir(path.join(cwd, ".."));
-            yield st.exec(`rm -r ${cwd}`);
-        }
+        process.chdir(cwd);
+        yield st.exec(`rm -r ${repo}`);
     });
 }
 exports.gitCommit = gitCommit;
@@ -8484,31 +8484,33 @@ function action(_actionName, params, core) {
             "versionBehindStr": branchBehindVersion || "0.0.0"
         });
         typeSafety_1.assert(bumpType !== "SAME", "Version is supposed to be updated");
-        yield st.exec(`git clone https://github.com/${owner}/${repo}`);
-        process.chdir(repo);
-        yield st.exec(`git checkout ${branch_ahead}`);
-        const { changelogRaw } = updateChangelog({
-            "changelogRaw": fs.existsSync("CHANGELOG.md") ?
-                fs.readFileSync("CHANGELOG.md")
-                    .toString("utf8")
-                : "",
-            "version": branchAheadVersion,
-            bumpType,
-            "body": commits
-                .reverse()
-                .filter(({ commit }) => !exclude_commit_from_author_names.includes(commit.author.name))
-                .map(({ commit }) => `- ${commit.message}  `)
-                .join("\n")
-        });
-        core.debug(`CHANGELOG.md: ${changelogRaw}`);
-        fs.writeFileSync("CHANGELOG.md", Buffer.from(changelogRaw, "utf8"));
         yield gitCommit_1.gitCommit({
             owner,
             repo,
-            "addAll": true,
             "commitAuthorEmail": commit_author_email,
-            "commitMessage": `Update changelog v${branchAheadVersion}`,
-            "removeFolderAfterward": true
+            "performChanges": () => __awaiter(this, void 0, void 0, function* () {
+                yield st.exec(`git checkout ${branch_ahead}`);
+                const { changelogRaw } = updateChangelog({
+                    "changelogRaw": fs.existsSync("CHANGELOG.md") ?
+                        fs.readFileSync("CHANGELOG.md")
+                            .toString("utf8")
+                        : "",
+                    "version": branchAheadVersion,
+                    bumpType,
+                    "body": commits
+                        .reverse()
+                        .filter(({ commit }) => !exclude_commit_from_author_names.includes(commit.author.name))
+                        .map(({ commit }) => `- ${commit.message}  `)
+                        .join("\n")
+                });
+                core.debug(`CHANGELOG.md: ${changelogRaw}`);
+                fs.writeFileSync("CHANGELOG.md", Buffer.from(changelogRaw, "utf8"));
+                return {
+                    "commit": true,
+                    "addAll": true,
+                    "message": `Update changelog v${branchAheadVersion}`
+                };
+            })
         });
     });
 }
@@ -9266,32 +9268,34 @@ function action(_actionName, params, core) {
     return __awaiter(this, void 0, void 0, function* () {
         core.debug(JSON.stringify(params));
         const { owner, repo, branch, commit_author_email } = params;
-        yield st.exec(`git clone https://github.com/${owner}/${repo}`);
-        process.chdir(repo);
-        yield st.exec(`git checkout ${branch}`);
-        const { version } = JSON.parse(fs.readFileSync("package.json")
-            .toString("utf8"));
-        if (!fs.existsSync("package-lock.json")) {
-            core.debug(`No package-lock.json tracked by ${owner}/${repo}#${branch}`);
-            return;
-        }
-        const packageLockJsonParsed = JSON.parse(fs.readFileSync("package-lock.json")
-            .toString("utf8"));
-        if (packageLockJsonParsed.version === version) {
-            core.debug("Nothing to do, version in package.json and package-lock.json are the same");
-            return;
-        }
-        fs.writeFileSync("package-lock.json", Buffer.from(JSON.stringify((() => {
-            packageLockJsonParsed.version = version;
-            return packageLockJsonParsed;
-        })(), null, 2), "utf8"));
         yield gitCommit_1.gitCommit({
             owner,
             repo,
-            "addAll": true,
             "commitAuthorEmail": commit_author_email,
-            "commitMessage": "Sync package.json and package.lock version",
-            "removeFolderAfterward": true
+            "performChanges": () => __awaiter(this, void 0, void 0, function* () {
+                yield st.exec(`git checkout ${branch}`);
+                const { version } = JSON.parse(fs.readFileSync("package.json")
+                    .toString("utf8"));
+                if (!fs.existsSync("package-lock.json")) {
+                    core.debug(`No package-lock.json tracked by ${owner}/${repo}#${branch}`);
+                    return { "commit": false };
+                }
+                const packageLockJsonParsed = JSON.parse(fs.readFileSync("package-lock.json")
+                    .toString("utf8"));
+                if (packageLockJsonParsed.version === version) {
+                    core.debug("Nothing to do, version in package.json and package-lock.json are the same");
+                    return { "commit": false };
+                }
+                fs.writeFileSync("package-lock.json", Buffer.from(JSON.stringify((() => {
+                    packageLockJsonParsed.version = version;
+                    return packageLockJsonParsed;
+                })(), null, 4), "utf8"));
+                return {
+                    "commit": true,
+                    "addAll": false,
+                    "message": "Sync package.json and package.lock version"
+                };
+            })
         });
     });
 }

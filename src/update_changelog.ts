@@ -84,43 +84,44 @@ export async function action(
     assert(bumpType !== "SAME", "Version is supposed to be updated");
 
 
-    await st.exec(`git clone https://github.com/${owner}/${repo}`);
-
-    process.chdir(repo);
-
-    await st.exec(`git checkout ${branch_ahead}`);
-
-    const { changelogRaw } = updateChangelog({
-        "changelogRaw":
-            fs.existsSync("CHANGELOG.md") ?
-                fs.readFileSync("CHANGELOG.md")
-                    .toString("utf8")
-                : "",
-        "version": branchAheadVersion,
-        bumpType,
-        "body": commits
-            .reverse()
-            .filter(({ commit }) => !exclude_commit_from_author_names.includes(commit.author.name))
-            .map(({ commit }) => `- ${commit.message}  `)
-            .join("\n")
-    });
-
-
-    core.debug(`CHANGELOG.md: ${changelogRaw}`);
-
-
-    fs.writeFileSync(
-        "CHANGELOG.md",
-        Buffer.from(changelogRaw, "utf8")
-    );
-
     await gitCommit({
         owner,
         repo,
-        "addAll": true,
         "commitAuthorEmail": commit_author_email,
-        "commitMessage": `Update changelog v${branchAheadVersion}`,
-        "removeFolderAfterward": true
+        "performChanges": async () => {
+
+            await st.exec(`git checkout ${branch_ahead}`);
+
+            const { changelogRaw } = updateChangelog({
+                "changelogRaw":
+                    fs.existsSync("CHANGELOG.md") ?
+                        fs.readFileSync("CHANGELOG.md")
+                            .toString("utf8")
+                        : "",
+                "version": branchAheadVersion,
+                bumpType,
+                "body": commits
+                    .reverse()
+                    .filter(({ commit }) => !exclude_commit_from_author_names.includes(commit.author.name))
+                    .map(({ commit }) => `- ${commit.message}  `)
+                    .join("\n")
+            });
+
+            core.debug(`CHANGELOG.md: ${changelogRaw}`);
+
+            fs.writeFileSync(
+                "CHANGELOG.md",
+                Buffer.from(changelogRaw, "utf8")
+            );
+
+            return {
+                "commit": true,
+                "addAll": true,
+                "message": `Update changelog v${branchAheadVersion}`
+            };
+
+        }
+
     });
 
 }
