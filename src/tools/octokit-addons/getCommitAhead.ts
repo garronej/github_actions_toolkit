@@ -6,8 +6,10 @@ import type { Octokit } from "@octokit/rest";
 
 /** Take two branch that have a common origin and list all the 
  * commit that have been made on the branch that is ahead since it
- * has been forked from the branch that is behind */
-export function getChangeLogFactory(
+ * has been forked from the branch that is behind.
+ * From the older to the newest.
+ * */
+export function getCommitAheadFactory(
     params: { octokit: Octokit; }
 ) {
 
@@ -16,7 +18,7 @@ export function getChangeLogFactory(
     const { getCommonOrigin } = getCommonOriginFactory({ octokit });
     const { listCommit } = listCommitFactory({ octokit });
 
-    async function getChangeLog(
+    async function getCommitAhead(
         params: {
             owner: string;
             repo: string;
@@ -46,7 +48,7 @@ export function getChangeLogFactory(
 
     }
 
-    return { getChangeLog };
+    return { getCommitAhead };
 
 
 

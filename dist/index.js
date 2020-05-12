@@ -5258,40 +5258,6 @@ function errname(uv, code) {
 
 /***/ }),
 
-/***/ 428:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-    result["default"] = mod;
-    return result;
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const st = __importStar(__webpack_require__(425));
-function gitPush(params) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const { owner, repo } = params;
-        yield st.exec(`git push "https://${owner}:${process.env["GITHUB_TOKEN"]}@github.com/${owner}/${repo}.git"`);
-    });
-}
-exports.gitPush = gitPush;
-
-
-/***/ }),
-
 /***/ 431:
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -5388,6 +5354,57 @@ function escapeProperty(s) {
         .replace(/,/g, '%2C');
 }
 //# sourceMappingURL=command.js.map
+
+/***/ }),
+
+/***/ 438:
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const getCommonOrigin_1 = __webpack_require__(709);
+const listCommit_1 = __webpack_require__(301);
+/** Take two branch that have a common origin and list all the
+ * commit that have been made on the branch that is ahead since it
+ * has been forked from the branch that is behind.
+ * From the older to the newest.
+ * */
+function getCommitAheadFactory(params) {
+    const { octokit } = params;
+    const { getCommonOrigin } = getCommonOrigin_1.getCommonOriginFactory({ octokit });
+    const { listCommit } = listCommit_1.listCommitFactory({ octokit });
+    function getCommitAhead(params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { owner, repo, branchBehind, branchAhead } = params;
+            const { sha } = yield getCommonOrigin({
+                owner,
+                repo,
+                "branch1": branchBehind,
+                "branch2": branchAhead
+            });
+            const commits = yield listCommit({
+                owner,
+                repo,
+                "branch": branchAhead,
+                sha
+            });
+            return { commits };
+        });
+    }
+    return { getCommitAhead };
+}
+exports.getCommitAheadFactory = getCommitAheadFactory;
+
 
 /***/ }),
 
@@ -7662,6 +7679,54 @@ module.exports = resolveCommand;
 
 /***/ }),
 
+/***/ 503:
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const st = __importStar(__webpack_require__(425));
+const path = __importStar(__webpack_require__(622));
+const assert_1 = __webpack_require__(970);
+function gitCommit(params) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const { owner, repo, addAll, commitMessage, commitAuthorEmail, removeFolderAfterward } = params;
+        yield st.exec(`git config --local user.email "${commitAuthorEmail}"`);
+        yield st.exec(`git config --local user.name "${commitAuthorEmail.split("@")[0]}"`);
+        if (addAll) {
+            yield st.exec(`git add -A`);
+        }
+        yield st.exec(`git commit -am "${commitMessage}"`);
+        yield st.exec(`git push "https://${owner}:${process.env["GITHUB_TOKEN"]}@github.com/${owner}/${repo}.git"`);
+        if (removeFolderAfterward) {
+            const cwd = process.cwd();
+            assert_1.assert(path.basename(cwd) === repo, `We should be in a repository named ${repo}`);
+            process.chdir(path.join(cwd, ".."));
+            yield st.exec(`rm -r ${cwd}`);
+        }
+    });
+}
+exports.gitCommit = gitCommit;
+
+
+/***/ }),
+
 /***/ 510:
 /***/ (function(module) {
 
@@ -8378,13 +8443,13 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const inputHelper_1 = __webpack_require__(649);
 const st = __importStar(__webpack_require__(425));
-const getChangeLog_1 = __webpack_require__(962);
+const getCommitAhead_1 = __webpack_require__(438);
 const get_package_json_version = __importStar(__webpack_require__(43));
 const fs = __importStar(__webpack_require__(747));
 const NpmModuleVersion_1 = __webpack_require__(395);
 const typeSafety_1 = __webpack_require__(601);
 const createOctokit_1 = __webpack_require__(906);
-const gitPush_1 = __webpack_require__(428);
+const gitCommit_1 = __webpack_require__(503);
 exports.getActionParams = inputHelper_1.getActionParamsFactory({
     "inputNameSubset": [
         "owner",
@@ -8401,8 +8466,8 @@ function action(_actionName, params, core) {
         core.debug(`params: ${JSON.stringify(params)}`);
         const exclude_commit_from_author_names = JSON.parse(params.exclude_commit_from_author_names_json);
         const octokit = createOctokit_1.createOctokit();
-        const { getChangeLog } = getChangeLog_1.getChangeLogFactory({ octokit });
-        const { commits } = yield getChangeLog({
+        const { getCommitAhead } = getCommitAhead_1.getCommitAheadFactory({ octokit });
+        const { commits } = yield getCommitAhead({
             owner,
             repo,
             "branchBehind": branch_behind,
@@ -8430,17 +8495,21 @@ function action(_actionName, params, core) {
             "version": branchAheadVersion,
             bumpType,
             "body": commits
+                .reverse()
                 .filter(({ commit }) => !exclude_commit_from_author_names.includes(commit.author.name))
                 .map(({ commit }) => `- ${commit.message}  `)
                 .join("\n")
         });
         core.debug(`CHANGELOG.md: ${changelogRaw}`);
         fs.writeFileSync("CHANGELOG.md", Buffer.from(changelogRaw, "utf8"));
-        yield st.exec(`git config --local user.email "${commit_author_email}"`);
-        yield st.exec(`git config --local user.name "${commit_author_email.split("@")[0]}"`);
-        yield st.exec(`git add -A`);
-        yield st.exec(`git commit -am "Update changelog v${branchAheadVersion}"`);
-        yield gitPush_1.gitPush({ owner, repo });
+        yield gitCommit_1.gitCommit({
+            owner,
+            repo,
+            "addAll": true,
+            "commitAuthorEmail": commit_author_email,
+            "commitMessage": `Update changelog v${branchAheadVersion}`,
+            "removeFolderAfterward": true
+        });
     });
 }
 exports.action = action;
@@ -9184,7 +9253,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const inputHelper_1 = __webpack_require__(649);
 const st = __importStar(__webpack_require__(425));
 const fs = __importStar(__webpack_require__(747));
-const gitPush_1 = __webpack_require__(428);
+const gitCommit_1 = __webpack_require__(503);
 exports.getActionParams = inputHelper_1.getActionParamsFactory({
     "inputNameSubset": [
         "owner",
@@ -9216,10 +9285,14 @@ function action(_actionName, params, core) {
             packageLockJsonParsed.version = version;
             return packageLockJsonParsed;
         })(), null, 2), "utf8"));
-        yield st.exec(`git config --local user.email "${commit_author_email}"`);
-        yield st.exec(`git config --local user.name "${commit_author_email.split("@")[0]}"`);
-        yield st.exec(`git commit -am "Sync package.json and package.lock version"`);
-        yield gitPush_1.gitPush({ owner, repo });
+        yield gitCommit_1.gitCommit({
+            owner,
+            repo,
+            "addAll": true,
+            "commitAuthorEmail": commit_author_email,
+            "commitMessage": "Sync package.json and package.lock version",
+            "removeFolderAfterward": true
+        });
     });
 }
 exports.action = action;
@@ -11300,55 +11373,6 @@ module.exports.sync = (cmd, args, opts) => {
 };
 
 module.exports.shellSync = (cmd, opts) => handleShell(module.exports.sync, cmd, opts);
-
-
-/***/ }),
-
-/***/ 962:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const getCommonOrigin_1 = __webpack_require__(709);
-const listCommit_1 = __webpack_require__(301);
-/** Take two branch that have a common origin and list all the
- * commit that have been made on the branch that is ahead since it
- * has been forked from the branch that is behind */
-function getChangeLogFactory(params) {
-    const { octokit } = params;
-    const { getCommonOrigin } = getCommonOrigin_1.getCommonOriginFactory({ octokit });
-    const { listCommit } = listCommit_1.listCommitFactory({ octokit });
-    function getChangeLog(params) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const { owner, repo, branchBehind, branchAhead } = params;
-            const { sha } = yield getCommonOrigin({
-                owner,
-                repo,
-                "branch1": branchBehind,
-                "branch2": branchAhead
-            });
-            const commits = yield listCommit({
-                owner,
-                repo,
-                "branch": branchAhead,
-                sha
-            });
-            return { commits };
-        });
-    }
-    return { getChangeLog };
-}
-exports.getChangeLogFactory = getChangeLogFactory;
 
 
 /***/ }),

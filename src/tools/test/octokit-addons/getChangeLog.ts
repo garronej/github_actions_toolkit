@@ -1,14 +1,14 @@
 
-import { getChangeLogFactory } from "../../octokit-addons/getChangeLog";
+import { getCommitAheadFactory } from "../../octokit-addons/getCommitAhead";
 import { Octokit } from "@octokit/rest";
 
 (async ()=>{
 
     const octokit = new Octokit();
 
-    const { getChangeLog } = getChangeLogFactory({ octokit });
+    const { getCommitAhead } = getCommitAheadFactory({ octokit });
 
-    const {commits}= await  getChangeLog({
+    const { commits } = await getCommitAhead({
         "owner": "garronej",
         "repo": "test-repo",
         "branchBehind": "garronej-patch-1",

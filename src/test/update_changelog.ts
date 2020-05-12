@@ -10,7 +10,7 @@ import * as st from "scripting-tools";
 
     const cwd = process.cwd();
 
-    const repo = "friendly_memory";
+    const repo = "sturdy_umbrella";
 
     await action("update_changelog", {
         "owner": "garronej",

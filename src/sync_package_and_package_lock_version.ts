@@ -1,7 +1,7 @@
 import { getActionParamsFactory } from "./inputHelper";
 import * as st from "scripting-tools";
 import * as fs from "fs";
-import { gitPush } from "./tools/gitPush";
+import { gitCommit } from "./tools/gitCommit";
 
 export const { getActionParams } = getActionParamsFactory({
     "inputNameSubset": [
@@ -70,10 +70,13 @@ export async function action(
         )
     );
 
-    await st.exec(`git config --local user.email "${commit_author_email}"`);
-    await st.exec(`git config --local user.name "${commit_author_email.split("@")[0]}"`);
-    await st.exec(`git commit -am "Sync package.json and package.lock version"`);
-
-    await gitPush({ owner, repo });
+    await gitCommit({
+        owner,
+        repo,
+        "addAll": true,
+        "commitAuthorEmail": commit_author_email,
+        "commitMessage": "Sync package.json and package.lock version",
+        "removeFolderAfterward": true
+    });
 
 }

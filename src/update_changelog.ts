@@ -1,13 +1,13 @@
 
 import { getActionParamsFactory } from "./inputHelper";
 import * as st from "scripting-tools";
-import { getChangeLogFactory } from "./tools/octokit-addons/getChangeLog";
+import { getCommitAheadFactory } from "./tools/octokit-addons/getCommitAhead";
 import * as get_package_json_version from "./get_package_json_version";
 import * as fs from "fs";
 import { NpmModuleVersion } from "./tools/NpmModuleVersion";
 import { assert } from "evt/dist/tools/typeSafety";
 import { createOctokit } from "./tools/createOctokit";
-import { gitPush } from "./tools/gitPush";
+import { gitCommit } from "./tools/gitCommit";
 
 export const { getActionParams } = getActionParamsFactory({
     "inputNameSubset": [
@@ -32,25 +32,25 @@ export async function action(
     core: CoreLike
 ) {
 
-    const { 
-        owner, 
-        repo, 
-        branch_ahead, 
-        branch_behind, 
+    const {
+        owner,
+        repo,
+        branch_ahead,
+        branch_behind,
         commit_author_email
     } = params;
 
     core.debug(`params: ${JSON.stringify(params)}`);
 
-    const exclude_commit_from_author_names: string[]= 
+    const exclude_commit_from_author_names: string[] =
         JSON.parse(params.exclude_commit_from_author_names_json)
         ;
 
     const octokit = createOctokit();
 
-    const { getChangeLog } = getChangeLogFactory({ octokit });
+    const { getCommitAhead } = getCommitAheadFactory({ octokit });
 
-    const { commits } = await getChangeLog({
+    const { commits } = await getCommitAhead({
         owner,
         repo,
         "branchBehind": branch_behind,
@@ -95,12 +95,12 @@ export async function action(
             fs.existsSync("CHANGELOG.md") ?
                 fs.readFileSync("CHANGELOG.md")
                     .toString("utf8")
-                : ""
-        ,
+                : "",
         "version": branchAheadVersion,
         bumpType,
         "body": commits
-            .filter(({ commit })=> !exclude_commit_from_author_names.includes(commit.author.name))
+            .reverse()
+            .filter(({ commit }) => !exclude_commit_from_author_names.includes(commit.author.name))
             .map(({ commit }) => `- ${commit.message}  `)
             .join("\n")
     });
@@ -114,12 +114,14 @@ export async function action(
         Buffer.from(changelogRaw, "utf8")
     );
 
-    await st.exec(`git config --local user.email "${commit_author_email}"`);
-    await st.exec(`git config --local user.name "${commit_author_email.split("@")[0]}"`);
-    await st.exec(`git add -A`);
-    await st.exec(`git commit -am "Update changelog v${branchAheadVersion}"`);
-
-    await gitPush({ owner, repo });
+    await gitCommit({
+        owner,
+        repo,
+        "addAll": true,
+        "commitAuthorEmail": commit_author_email,
+        "commitMessage": `Update changelog v${branchAheadVersion}`,
+        "removeFolderAfterward": true
+    });
 
 }
 
