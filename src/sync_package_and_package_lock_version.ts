@@ -66,7 +66,7 @@ export async function action(
                         })(),
                         null,
                         4
-                    ),
+                    ) + "\n",
                     "utf8"
                 )
             );

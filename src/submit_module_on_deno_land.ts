@@ -106,10 +106,6 @@ export async function action(
 
     }
 
-    await st.exec(`git config --local hub.protocol https`);
-    await st.exec(`git config --local user.name "${owner}"`);
-
-
     if( !st.apt_get_install_if_missing.doesHaveProg("hub") ){
 
         await st.exec("curl -fsSL https://github.com/github/hub/raw/master/script/get | bash -s 2.14.1");
@@ -124,6 +120,9 @@ export async function action(
     try {
 
         process.chdir(repoPath);
+
+        await st.exec(`git config --local hub.protocol https`);
+        await st.exec(`git config --local user.name "${owner}"`);
 
         const branch = `add_${repo}_third_party_module`;
 
@@ -195,7 +194,7 @@ export async function action(
                     })(),
                     null,
                     2
-                ),
+                ) + "\n",
                 "utf8"
             )
         );

@@ -8382,8 +8382,6 @@ function action(_actionName, params, core) {
         if (moduleNameAvailabilityStatus === "PENDING SUBMISSION BY OTHER") {
             core.warning("An other user has already submitted a PR for adding a module with the same name.");
         }
-        yield st.exec(`git config --local hub.protocol https`);
-        yield st.exec(`git config --local user.name "${owner}"`);
         if (!st.apt_get_install_if_missing.doesHaveProg("hub")) {
             yield st.exec("curl -fsSL https://github.com/github/hub/raw/master/script/get | bash -s 2.14.1");
         }
@@ -8391,6 +8389,8 @@ function action(_actionName, params, core) {
         const repoPath = path.join(process.cwd(), deno_website_repo);
         try {
             process.chdir(repoPath);
+            yield st.exec(`git config --local hub.protocol https`);
+            yield st.exec(`git config --local user.name "${owner}"`);
             const branch = `add_${repo}_third_party_module`;
             yield st.exec(`git checkout -b ${branch}`);
             const databaseFilePath = path.join("src", "database.json");
@@ -8420,7 +8420,7 @@ function action(_actionName, params, core) {
                             desc
                         });
                 return out;
-            })(), null, 2), "utf8"));
+            })(), null, 2) + "\n", "utf8"));
             const commitMessage = `Adding ${repo} to database.json`;
             yield st.exec(`git commit -am "${commitMessage}"`);
             yield st.exec(`hub fork --remote-name origin`);
@@ -9876,7 +9876,7 @@ function action(_actionName, params, core) {
                 fs.writeFileSync("package-lock.json", Buffer.from(JSON.stringify((() => {
                     packageLockJsonParsed.version = version;
                     return packageLockJsonParsed;
-                })(), null, 4), "utf8"));
+                })(), null, 4) + "\n", "utf8"));
                 return {
                     "commit": true,
                     "addAll": false,
