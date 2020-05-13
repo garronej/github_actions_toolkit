@@ -2,11 +2,8 @@
 
 
 import { action } from "../get_package_json_version";
-import * as st from "scripting-tools";
 
 (async () => {
-
-    const cwd = process.cwd();
 
     const repo = "congenial_pancake";
 
@@ -18,9 +15,6 @@ import * as st from "scripting-tools";
 
     console.log({ version });
 
-    process.chdir(cwd);
-
-    await st.exec(`rm -rf ${repo}`);
 
 })();
 

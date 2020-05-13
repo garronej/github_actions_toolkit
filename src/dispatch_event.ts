@@ -27,7 +27,6 @@ export async function action(
 
     core.debug(JSON.stringify({ _actionName, params }));
 
-    core.debug("tok====> " + process.env["GITHUB_TOKEN"]);
 
     const octokit = createOctokit();
 

@@ -1,11 +1,8 @@
 
 
 import { action } from "../sync_package_and_package_lock_version";
-import * as st from "scripting-tools";
 
 (async () => {
-
-    const cwd = process.cwd();
 
     const repo = "super_waffle";
 
@@ -17,10 +14,6 @@ import * as st from "scripting-tools";
     },
         { "debug": console.log }
     );
-
-    process.chdir(cwd);
-
-    await st.exec(`rm -rf ${repo}`);
 
 })();
 

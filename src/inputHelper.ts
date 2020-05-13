@@ -1,5 +1,5 @@
 
-import * as core from '@actions/core'
+import * as core from '@actions/core';
 
 export const inputNames = [
     "action_name",
@@ -11,14 +11,17 @@ export const inputNames = [
     "branch_behind",
     "branch_ahead",
     "commit_author_email",
-    "exclude_commit_from_author_names_json"
+    "exclude_commit_from_author_names_json",
+    "module_name"
 ] as const;
 
 export const availableActions = [
     "get_package_json_version",
     "dispatch_event",
     "update_changelog",
-    "sync_package_and_package_lock_version"
+    "sync_package_and_package_lock_version",
+    "submit_module_on_deno_land",
+    "is_well_formed_and_available_module_name"
 ] as const;
 
 
@@ -54,6 +57,9 @@ export function getInputDescription(inputName: typeof inputNames[number]): strin
         case "exclude_commit_from_author_names_json": return [
             "For update_changelog, do not includes commit from user ", 
             `certain committer in the CHANGELOG.md, ex: '["denoify_ci"]'`
+        ].join("");
+        case "module_name": return [
+            `A candidate module name, Example: lodash`
         ].join("");
     }
 }

@@ -2,13 +2,9 @@
 import { action } from "../update_changelog";
 import * as st from "scripting-tools";
 
-
-
 (async () => {
 
     st.enableCmdTrace();
-
-    const cwd = process.cwd();
 
     const repo = "sturdy_umbrella";
 
@@ -23,9 +19,5 @@ import * as st from "scripting-tools";
         { "debug": console.log }
     );
 
-
-    process.chdir(cwd);
-
-    await st.exec(`rm -rf ${repo}`);
 
 })();

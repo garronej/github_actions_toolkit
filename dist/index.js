@@ -308,6 +308,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.getCommitAsyncIterableFactory = void 0;
 const per_page = 30;
 /** Iterate over the commits of a repo's branch */
 function getCommitAsyncIterableFactory(params) {
@@ -395,6 +396,72 @@ exports.objectKeys = objectKeys;
 
 /***/ }),
 
+/***/ 42:
+/***/ (function(__unusedmodule, exports) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.getCommitAsyncIterableFactory = void 0;
+const per_page = 99;
+function getCommitAsyncIterableFactory(params) {
+    const { octokit } = params;
+    function getCommitAsyncIterable(params) {
+        const { owner, repo, state } = params;
+        let pullRequests = [];
+        let page = 0;
+        let isLastPage = undefined;
+        const getPullsListResponseData = (params) => octokit.pulls.list({
+            owner,
+            repo,
+            state,
+            per_page,
+            "page": params.page
+        }).then(({ data }) => data);
+        return {
+            [Symbol.asyncIterator]() {
+                return {
+                    "next": () => __awaiter(this, void 0, void 0, function* () {
+                        if (pullRequests.length === 0) {
+                            if (isLastPage) {
+                                return { "done": true, "value": undefined };
+                            }
+                            page++;
+                            pullRequests = yield getPullsListResponseData({ page });
+                            if (pullRequests.length === 0) {
+                                return { "done": true, "value": undefined };
+                            }
+                            isLastPage =
+                                pullRequests.length !== per_page ||
+                                    (yield getPullsListResponseData({ "page": page + 1 })).length === 0;
+                        }
+                        const [pullRequest, ...rest] = pullRequests;
+                        pullRequests = rest;
+                        return {
+                            "value": pullRequest,
+                            "done": false
+                        };
+                    })
+                };
+            }
+        };
+    }
+    return { getCommitAsyncIterable };
+}
+exports.getCommitAsyncIterableFactory = getCommitAsyncIterableFactory;
+
+
+/***/ }),
+
 /***/ 43:
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -413,6 +480,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.action = exports.setOutput = exports.getActionParams = void 0;
 const node_fetch_1 = __importDefault(__webpack_require__(454));
 const urlJoin = __webpack_require__(683);
 const outputHelper_1 = __webpack_require__(762);
@@ -792,6 +860,25 @@ function checkMode (stat, options) {
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -801,18 +888,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-    result["default"] = mod;
-    return result;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(__webpack_require__(470));
 const get_package_json_version = __importStar(__webpack_require__(43));
 const dispatch_event = __importStar(__webpack_require__(863));
 const sync_package_and_package_lock_version = __importStar(__webpack_require__(830));
+const submit_module_on_deno_land = __importStar(__webpack_require__(623));
+const is_well_formed_and_available_module_name = __importStar(__webpack_require__(794));
 const inputHelper_1 = __webpack_require__(649);
 const update_changelog = __importStar(__webpack_require__(702));
 function run() {
@@ -830,6 +912,12 @@ function run() {
                 return;
             case "sync_package_and_package_lock_version":
                 yield sync_package_and_package_lock_version.action(action_name, sync_package_and_package_lock_version.getActionParams(), core);
+                return;
+            case "submit_module_on_deno_land":
+                submit_module_on_deno_land.setOutput(yield submit_module_on_deno_land.action(action_name, submit_module_on_deno_land.getActionParams(), core));
+                return;
+            case "is_well_formed_and_available_module_name":
+                is_well_formed_and_available_module_name.setOutput(yield is_well_formed_and_available_module_name.action(action_name, is_well_formed_and_available_module_name.getActionParams(), core));
                 return;
         }
         throw new Error(`${action_name} Not supported`);
@@ -2674,6 +2762,7 @@ var __asyncValues = (this && this.__asyncValues) || function (o) {
     function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.listCommitFactory = void 0;
 const getCommitAsyncIterable_1 = __webpack_require__(32);
 /** Return the list of commit since given sha (excluded)
  * ordered from the oldest to the newest */
@@ -3271,6 +3360,7 @@ module.exports = readShebang;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.NpmModuleVersion = void 0;
 var NpmModuleVersion;
 (function (NpmModuleVersion) {
     function parse(versionStr) {
@@ -5372,6 +5462,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.getCommitAheadFactory = void 0;
 const getCommonOrigin_1 = __webpack_require__(709);
 const listCommit_1 = __webpack_require__(301);
 /** Take two branch that have a common origin and list all the
@@ -7684,6 +7775,25 @@ module.exports = resolveCommand;
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -7693,14 +7803,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-    result["default"] = mod;
-    return result;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.gitCommit = void 0;
 const st = __importStar(__webpack_require__(425));
 function gitCommit(params) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -7775,6 +7879,119 @@ function addHook (state, kind, name, hook) {
     hook: hook,
     orig: orig
   })
+}
+
+
+/***/ }),
+
+/***/ 522:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+
+var scopedPackagePattern = new RegExp('^(?:@([^/]+?)[/])?([^/]+?)$')
+var builtins = __webpack_require__(745)
+var blacklist = [
+  'node_modules',
+  'favicon.ico'
+]
+
+var validate = module.exports = function (name) {
+  var warnings = []
+  var errors = []
+
+  if (name === null) {
+    errors.push('name cannot be null')
+    return done(warnings, errors)
+  }
+
+  if (name === undefined) {
+    errors.push('name cannot be undefined')
+    return done(warnings, errors)
+  }
+
+  if (typeof name !== 'string') {
+    errors.push('name must be a string')
+    return done(warnings, errors)
+  }
+
+  if (!name.length) {
+    errors.push('name length must be greater than zero')
+  }
+
+  if (name.match(/^\./)) {
+    errors.push('name cannot start with a period')
+  }
+
+  if (name.match(/^_/)) {
+    errors.push('name cannot start with an underscore')
+  }
+
+  if (name.trim() !== name) {
+    errors.push('name cannot contain leading or trailing spaces')
+  }
+
+  // No funny business
+  blacklist.forEach(function (blacklistedName) {
+    if (name.toLowerCase() === blacklistedName) {
+      errors.push(blacklistedName + ' is a blacklisted name')
+    }
+  })
+
+  // Generate warnings for stuff that used to be allowed
+
+  // core module names like http, events, util, etc
+  builtins.forEach(function (builtin) {
+    if (name.toLowerCase() === builtin) {
+      warnings.push(builtin + ' is a core module name')
+    }
+  })
+
+  // really-long-package-names-------------------------------such--length-----many---wow
+  // the thisisareallyreallylongpackagenameitshouldpublishdowenowhavealimittothelengthofpackagenames-poch.
+  if (name.length > 214) {
+    warnings.push('name can no longer contain more than 214 characters')
+  }
+
+  // mIxeD CaSe nAMEs
+  if (name.toLowerCase() !== name) {
+    warnings.push('name can no longer contain capital letters')
+  }
+
+  if (/[~'!()*]/.test(name.split('/').slice(-1)[0])) {
+    warnings.push('name can no longer contain special characters ("~\'!()*")')
+  }
+
+  if (encodeURIComponent(name) !== name) {
+    // Maybe it's a scoped package name, like @user/package
+    var nameMatch = name.match(scopedPackagePattern)
+    if (nameMatch) {
+      var user = nameMatch[1]
+      var pkg = nameMatch[2]
+      if (encodeURIComponent(user) === user && encodeURIComponent(pkg) === pkg) {
+        return done(warnings, errors)
+      }
+    }
+
+    errors.push('name can only contain URL-friendly characters')
+  }
+
+  return done(warnings, errors)
+}
+
+validate.scopedPackagePattern = scopedPackagePattern
+
+var done = function (warnings, errors) {
+  var result = {
+    validForNewPackages: errors.length === 0 && warnings.length === 0,
+    validForOldPackages: errors.length === 0,
+    warnings: warnings,
+    errors: errors
+  }
+  if (!result.warnings.length) delete result.warnings
+  if (!result.errors.length) delete result.errors
+  return result
 }
 
 
@@ -8067,19 +8284,271 @@ module.exports = require("path");
 
 /***/ }),
 
+/***/ 623:
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __asyncValues = (this && this.__asyncValues) || function (o) {
+    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+    var m = o[Symbol.asyncIterator], i;
+    return m ? m.call(o) : (o = typeof __values === "function" ? __values(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i);
+    function verb(n) { i[n] = o[n] && function (v) { return new Promise(function (resolve, reject) { v = o[n](v), settle(resolve, reject, v.done, v.value); }); }; }
+    function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.action = exports.setOutput = exports.getActionParams = void 0;
+const inputHelper_1 = __webpack_require__(649);
+const outputHelper_1 = __webpack_require__(762);
+const createOctokit_1 = __webpack_require__(906);
+const st = __importStar(__webpack_require__(425));
+const fs = __importStar(__webpack_require__(747));
+const path = __importStar(__webpack_require__(622));
+const node_fetch_1 = __importDefault(__webpack_require__(454));
+const urlJoin = __webpack_require__(683);
+const typeSafety_1 = __webpack_require__(601);
+const is_well_formed_and_available_module_name = __importStar(__webpack_require__(794));
+const getPullRequestAsyncIterable_1 = __webpack_require__(42);
+exports.getActionParams = inputHelper_1.getActionParamsFactory({
+    "inputNameSubset": [
+        "owner",
+        "repo",
+        "commit_author_email"
+    ]
+}).getActionParams;
+const deno_website_repo = "deno_website2";
+//TODO: Change by denoland once tested
+const denoland = "cahuzacf";
+exports.setOutput = outputHelper_1.setOutputFactory().setOutput;
+function action(_actionName, params, core) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const { owner, repo, commit_author_email } = params;
+        const { is_available_on_deno_land } = yield is_well_formed_and_available_module_name.action("is_well_formed_and_available_module_name", { "module_name": repo }, core);
+        if (!is_available_on_deno_land) {
+            const databaseJsonParsed = yield node_fetch_1.default(urlJoin("https://raw.github.com", denoland, deno_website_repo, "master", "src", "database.json"))
+                .then(res => res.text())
+                .then(text => JSON.parse(text));
+            const entry = databaseJsonParsed[repo];
+            if (entry.owner === owner) {
+                core.debug("Module already published");
+                return { "was_already_published": "true" };
+            }
+            throw new Error(`${repo} module name is no longer available, published by someone else`);
+        }
+        const moduleNameAvailabilityStatus = yield checkModuleNameAvailabilityOnDenoLandX({
+            "octokit": createOctokit_1.createOctokit(),
+            owner,
+            "module_name": repo,
+            core
+        });
+        if (moduleNameAvailabilityStatus === "PENDING SUBMISSION BY USER") {
+            core.debug("Pending submission");
+            return { "was_already_published": "true" };
+        }
+        if (moduleNameAvailabilityStatus === "PREVIOUSLY REJECTED SUBMISSION BY USER") {
+            throw new Error(`A pull request for adding ${repo} was already issued but not merged, not issuing a new one`);
+        }
+        if (moduleNameAvailabilityStatus === "PENDING SUBMISSION BY OTHER") {
+            core.warning("An other user has already submitted a PR for adding a module with the same name.");
+        }
+        yield st.exec(`git config --local hub.protocol https`);
+        yield st.exec(`git config --local user.name "${owner}"`);
+        if (!st.apt_get_install_if_missing.doesHaveProg("hub")) {
+            yield st.exec("curl -fsSL https://github.com/github/hub/raw/master/script/get | bash -s 2.14.1");
+        }
+        yield st.exec(`hub clone ${denoland}/${deno_website_repo}`);
+        const repoPath = path.join(process.cwd(), deno_website_repo);
+        try {
+            process.chdir(repoPath);
+            const branch = `add_${repo}_third_party_module`;
+            yield st.exec(`git checkout -b ${branch}`);
+            const databaseFilePath = path.join("src", "database.json");
+            let databaseJsonParsed = JSON.parse(fs.readFileSync(databaseFilePath).toString("utf8"));
+            const moduleNames = Object.keys(databaseJsonParsed);
+            if (moduleNames.indexOf(repo) >= 0) {
+                throw new Error(`Seems like the module name ${repo} is no longer available`);
+            }
+            const { desc } = yield node_fetch_1.default(urlJoin("https://raw.github.com", owner, repo, "master", "package.json"))
+                .then(res => res.text())
+                .then(text => JSON.parse(text))
+                .then(({ description }) => {
+                typeSafety_1.assert(typeof description === "string", "No description field in package.json");
+                return { "desc": description };
+            });
+            fs.writeFileSync(databaseFilePath, Buffer.from(JSON.stringify((() => {
+                const out = {};
+                [...moduleNames, repo]
+                    .sort()
+                    .forEach(moduleName => out[moduleName] =
+                    moduleName !== repo ?
+                        databaseJsonParsed[moduleName] :
+                        {
+                            "type": "github",
+                            owner,
+                            repo,
+                            desc
+                        });
+                return out;
+            })(), null, 2), "utf8"));
+            const commitMessage = `Adding ${repo} to database.json`;
+            yield st.exec(`git commit -am "${commitMessage}"`);
+            yield st.exec(`hub fork --remote-name origin`);
+            yield st.exec(`git push origin ${branch}`);
+            yield st.exec(`hub pull-request -m "` + [
+                commitMessage,
+                ``,
+                `https://github.com/${owner}/${repo}`,
+                ``,
+                `This is an automatic PR submitted on behalf of ${owner} by [denoify_ci](https://github.com/garronej/denoify_ci/blob/dev/TEMPLATE_README.md)`
+            ].join("\n") + `"`);
+            process.chdir(path.join(process.cwd(), ".."));
+            yield st.exec(`rm -r ${deno_website_repo}`);
+            return { "was_already_published": "false" };
+        }
+        catch (error) {
+            yield st.exec(`rm -r ${repoPath}`);
+            throw error;
+        }
+    });
+}
+exports.action = action;
+function checkModuleNameAvailabilityOnDenoLandX(params) {
+    var e_1, _a;
+    return __awaiter(this, void 0, void 0, function* () {
+        const { octokit, core } = params;
+        core.debug(`checkModuleNameAvailabilityOnDenoLandX`);
+        const { getCommitAsyncIterable } = getPullRequestAsyncIterable_1.getCommitAsyncIterableFactory({ octokit });
+        try {
+            for (var _b = __asyncValues(getCommitAsyncIterable({
+                "owner": "denoland",
+                "repo": deno_website_repo,
+                "state": "all",
+            })), _c; _c = yield _b.next(), !_c.done;) {
+                const pullRequest = _c.value;
+                if (pullRequest.state === "closed" && !!pullRequest.merged_at) {
+                    continue;
+                }
+                const database_json_changes = yield octokit.pulls.listFiles({
+                    "owner": "denoland",
+                    "repo": deno_website_repo,
+                    "pull_number": pullRequest.number,
+                    "pages": 0
+                }).then(({ data }) => data.find(({ filename }) => filename === "src/database.json"));
+                if (database_json_changes === undefined) {
+                    continue;
+                }
+                const databaseJsonParsed = yield node_fetch_1.default(database_json_changes.raw_url)
+                    .then(res => res.text())
+                    .then(text => JSON.parse(text))
+                    .catch(() => undefined);
+                ;
+                if (typeof databaseJsonParsed !== "object") {
+                    core.debug(`Error parsing database.json for PR n°${pullRequest.number}, skipping`);
+                    continue;
+                }
+                if (!(params.module_name in databaseJsonParsed)) {
+                    continue;
+                }
+                const entry = databaseJsonParsed[params.module_name];
+                if (typeof entry !== "object") {
+                    core.debug(`Entry malformed for PR n°${pullRequest.number}, skipping`);
+                    continue;
+                }
+                const { owner } = entry;
+                if (typeof owner !== "string") {
+                    core.debug(`No owner field, in PR n°${pullRequest.number}, skipping`);
+                    continue;
+                }
+                if (owner === params.owner) {
+                    if (pullRequest.state === "closed") {
+                        core.debug("Already rejected, not submitting an other one");
+                        return "PREVIOUSLY REJECTED SUBMISSION BY USER";
+                    }
+                    core.debug(`Pull request already opened, pending approval`);
+                    return "PENDING SUBMISSION BY USER";
+                }
+                else {
+                    if (pullRequest.state === "closed") {
+                        core.debug("Someone already to submit a module named like that but the PR wasn't merged");
+                        continue;
+                    }
+                    core.debug("Two module with the same name in the race");
+                    return "PENDING SUBMISSION BY OTHER";
+                }
+            }
+        }
+        catch (e_1_1) { e_1 = { error: e_1_1 }; }
+        finally {
+            try {
+                if (_c && !_c.done && (_a = _b.return)) yield _a.call(_b);
+            }
+            finally { if (e_1) throw e_1.error; }
+        }
+        core.debug(`${params.module_name} is available for submission`);
+        return "AVAILABLE";
+    });
+}
+
+
+/***/ }),
+
 /***/ 649:
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-    result["default"] = mod;
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.getActionName = exports.getActionParamsFactory = exports.getInputDescription = exports.availableActions = exports.inputNames = void 0;
 const core = __importStar(__webpack_require__(470));
 exports.inputNames = [
     "action_name",
@@ -8091,13 +8560,16 @@ exports.inputNames = [
     "branch_behind",
     "branch_ahead",
     "commit_author_email",
-    "exclude_commit_from_author_names_json"
+    "exclude_commit_from_author_names_json",
+    "module_name"
 ];
 exports.availableActions = [
     "get_package_json_version",
     "dispatch_event",
     "update_changelog",
-    "sync_package_and_package_lock_version"
+    "sync_package_and_package_lock_version",
+    "submit_module_on_deno_land",
+    "is_well_formed_and_available_module_name"
 ];
 function getInputDescription(inputName) {
     switch (inputName) {
@@ -8131,6 +8603,9 @@ function getInputDescription(inputName) {
         case "exclude_commit_from_author_names_json": return [
             "For update_changelog, do not includes commit from user ",
             `certain committer in the CHANGELOG.md, ex: '["denoify_ci"]'`
+        ].join("");
+        case "module_name": return [
+            `A candidate module name, Example: lodash`
         ].join("");
     }
 }
@@ -8424,6 +8899,25 @@ module.exports = (promise, onFinally) => {
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -8433,14 +8927,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-    result["default"] = mod;
-    return result;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.action = exports.getActionParams = void 0;
 const inputHelper_1 = __webpack_require__(649);
 const st = __importStar(__webpack_require__(425));
 const getCommitAhead_1 = __webpack_require__(438);
@@ -8550,6 +9038,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.getCommonOriginFactory = void 0;
 const getCommitAsyncIterable_1 = __webpack_require__(32);
 /** Return the sha of the first common commit between two branches */
 function getCommonOriginFactory(params) {
@@ -8656,6 +9145,13 @@ function sync (path, options) {
   }
 }
 
+
+/***/ }),
+
+/***/ 745:
+/***/ (function(module) {
+
+module.exports = ["assert","buffer","child_process","cluster","console","constants","crypto","dgram","dns","domain","events","fs","http","https","module","net","os","path","process","punycode","querystring","readline","repl","stream","string_decoder","timers","tls","tty","url","util","v8","vm","zlib"];
 
 /***/ }),
 
@@ -8863,22 +9359,45 @@ module.exports = require("zlib");
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-    result["default"] = mod;
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.setOutputFactory = exports.getOutputDescription = exports.outputNames = void 0;
 const core = __importStar(__webpack_require__(470));
 const objectKeys_1 = __webpack_require__(40);
 exports.outputNames = [
-    "version"
+    "version",
+    "is_valid_node_module_name",
+    "is_valid_deno_module_name",
+    "is_available_on_npm",
+    "is_available_on_deno_land",
+    "was_already_published"
 ];
 function getOutputDescription(inputName) {
     switch (inputName) {
         case "version": return "Output of get_package_json_version";
+        case "is_valid_node_module_name": return "true|false";
+        case "is_valid_deno_module_name": return "true|false";
+        case "is_available_on_npm": return "true|false";
+        case "is_available_on_deno_land": return "true|false";
+        case "was_already_published": return "true|false";
     }
 }
 exports.getOutputDescription = getOutputDescription;
@@ -8938,6 +9457,61 @@ module.exports = function (x) {
 
 	return x;
 };
+
+
+/***/ }),
+
+/***/ 794:
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.action = exports.setOutput = exports.getActionParams = void 0;
+const outputHelper_1 = __webpack_require__(762);
+const inputHelper_1 = __webpack_require__(649);
+const is404_1 = __webpack_require__(854);
+const validate_npm_package_name_1 = __importDefault(__webpack_require__(522));
+exports.getActionParams = inputHelper_1.getActionParamsFactory({
+    "inputNameSubset": [
+        "module_name"
+    ]
+}).getActionParams;
+exports.setOutput = outputHelper_1.setOutputFactory().setOutput;
+function action(_actionName, params, core) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const { module_name } = params;
+        const { validForNewPackages } = validate_npm_package_name_1.default(module_name);
+        const validForDenoPackages = validForNewPackages && module_name.indexOf("-") < 0;
+        return {
+            "is_valid_node_module_name": validForNewPackages ? "true" : "false",
+            "is_available_on_npm": !validForNewPackages ?
+                "false"
+                :
+                    (yield is404_1.is404(`https://www.npmjs.com/package/${module_name}`)) ?
+                        "true" : "false",
+            "is_valid_deno_module_name": validForDenoPackages ? "true" : "false",
+            "is_available_on_deno_land": !validForDenoPackages ?
+                "false"
+                :
+                    (yield is404_1.is404(`https://deno.land/x/${module_name}/`)) ?
+                        "true" : "false"
+        };
+    });
+}
+exports.action = action;
 
 
 /***/ }),
@@ -9235,6 +9809,25 @@ function sync (path, options) {
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -9244,14 +9837,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-    result["default"] = mod;
-    return result;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.action = exports.getActionParams = void 0;
 const inputHelper_1 = __webpack_require__(649);
 const st = __importStar(__webpack_require__(425));
 const fs = __importStar(__webpack_require__(747));
@@ -10513,7 +11100,7 @@ const Endpoints = {
   }
 };
 
-const VERSION = "3.10.0";
+const VERSION = "3.11.0";
 
 function endpointsToMethods(octokit, endpointsMap) {
   const newMethods = {};
@@ -10619,6 +11206,25 @@ exports.restEndpointMethods = restEndpointMethods;
 
 /***/ }),
 
+/***/ 854:
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.is404 = void 0;
+const node_fetch_1 = __importDefault(__webpack_require__(454));
+function is404(url) {
+    return node_fetch_1.default(url).then(({ status }) => status === 404);
+}
+exports.is404 = is404;
+
+
+/***/ }),
+
 /***/ 863:
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -10634,6 +11240,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.action = exports.getActionParams = void 0;
 const inputHelper_1 = __webpack_require__(649);
 const createOctokit_1 = __webpack_require__(906);
 exports.getActionParams = inputHelper_1.getActionParamsFactory({
@@ -10648,7 +11255,6 @@ function action(_actionName, params, core) {
     return __awaiter(this, void 0, void 0, function* () {
         const { owner, repo, event_type, client_payload_json } = params;
         core.debug(JSON.stringify({ _actionName, params }));
-        core.debug("tok====> " + process.env["GITHUB_TOKEN"]);
         const octokit = createOctokit_1.createOctokit();
         yield octokit.repos.createDispatchEvent(Object.assign({ owner,
             repo,
@@ -10769,7 +11375,7 @@ var pluginRequestLog = __webpack_require__(916);
 var pluginPaginateRest = __webpack_require__(299);
 var pluginRestEndpointMethods = __webpack_require__(842);
 
-const VERSION = "17.8.0";
+const VERSION = "17.9.0";
 
 const Octokit = core.Octokit.plugin(pluginRequestLog.requestLog, pluginRestEndpointMethods.restEndpointMethods, pluginPaginateRest.paginateRest).defaults({
   userAgent: `octokit-rest.js/${VERSION}`
@@ -10880,6 +11486,7 @@ exports.withCustomRequest = withCustomRequest;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.createOctokit = void 0;
 const rest_1 = __webpack_require__(889);
 /** Instantiate an Octokit with auth from $GITHUB_TOKEN in env */
 function createOctokit() {
