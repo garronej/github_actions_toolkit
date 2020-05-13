@@ -24,8 +24,8 @@ export const { getActionParams } = getActionParamsFactory({
 });
 
 const deno_website_repo = "deno_website2";
-//TODO: Change by denoland once tested
-const denoland= "cahuzacf";
+//const denoland= "cahuzacf";
+const denoland= "denoland";
 
 export type Params = ReturnType<typeof getActionParams>;
 

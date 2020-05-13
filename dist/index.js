@@ -8348,8 +8348,8 @@ exports.getActionParams = inputHelper_1.getActionParamsFactory({
     ]
 }).getActionParams;
 const deno_website_repo = "deno_website2";
-//TODO: Change by denoland once tested
-const denoland = "cahuzacf";
+//const denoland= "cahuzacf";
+const denoland = "denoland";
 exports.setOutput = outputHelper_1.setOutputFactory().setOutput;
 function action(_actionName, params, core) {
     return __awaiter(this, void 0, void 0, function* () {
