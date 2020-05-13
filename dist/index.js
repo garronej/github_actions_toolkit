@@ -8366,7 +8366,7 @@ function action(_actionName, params, core) {
             }
             throw new Error(`${repo} module name is no longer available, published by someone else`);
         }
-        const moduleNameAvailabilityStatus = yield checkModuleNameAvailabilityOnDenoLandX({
+        const moduleNameAvailabilityStatus = yield checkDenoLandPullRequests({
             "octokit": createOctokit_1.createOctokit(),
             owner,
             "module_name": repo,
@@ -8391,7 +8391,7 @@ function action(_actionName, params, core) {
             process.chdir(repoPath);
             yield st.exec(`git config --local hub.protocol https`);
             yield st.exec(`git config --local user.name "${owner}"`);
-            const branch = `add_${repo}_third_party_module`;
+            const branch = `add_${repo}_third_party_module_${Date.now()}`;
             yield st.exec(`git checkout -b ${branch}`);
             const databaseFilePath = path.join("src", "database.json");
             let databaseJsonParsed = JSON.parse(fs.readFileSync(databaseFilePath).toString("utf8"));
@@ -8424,13 +8424,17 @@ function action(_actionName, params, core) {
             const commitMessage = `Adding ${repo} to database.json`;
             yield st.exec(`git commit -am "${commitMessage}"`);
             yield st.exec(`hub fork --remote-name origin`);
+            yield st.exec([
+                `git remote set-url origin`,
+                `https://${owner}:${process.env["GITHUB_TOKEN"]}@github.com/${owner}/${deno_website_repo}.git`,
+            ].join(" "));
             yield st.exec(`git push origin ${branch}`);
             yield st.exec(`hub pull-request -m "` + [
                 commitMessage,
                 ``,
                 `https://github.com/${owner}/${repo}`,
                 ``,
-                `This is an automatic PR submitted on behalf of ${owner} by [denoify_ci](https://github.com/garronej/denoify_ci/blob/dev/TEMPLATE_README.md)`
+                `This is an automatic PR submitted on behalf of u/${owner} by [denoify_ci](https://github.com/garronej/denoify_ci/blob/dev/TEMPLATE_README.md)`
             ].join("\n") + `"`);
             process.chdir(path.join(process.cwd(), ".."));
             yield st.exec(`rm -r ${deno_website_repo}`);
@@ -8443,15 +8447,15 @@ function action(_actionName, params, core) {
     });
 }
 exports.action = action;
-function checkModuleNameAvailabilityOnDenoLandX(params) {
+function checkDenoLandPullRequests(params) {
     var e_1, _a;
     return __awaiter(this, void 0, void 0, function* () {
         const { octokit, core } = params;
-        core.debug(`checkModuleNameAvailabilityOnDenoLandX`);
+        core.debug(`Checking ${denoland}/${deno_website_repo} pull requests`);
         const { getCommitAsyncIterable } = getPullRequestAsyncIterable_1.getCommitAsyncIterableFactory({ octokit });
         try {
             for (var _b = __asyncValues(getCommitAsyncIterable({
-                "owner": "denoland",
+                "owner": denoland,
                 "repo": deno_website_repo,
                 "state": "all",
             })), _c; _c = yield _b.next(), !_c.done;) {
@@ -8460,7 +8464,7 @@ function checkModuleNameAvailabilityOnDenoLandX(params) {
                     continue;
                 }
                 const database_json_changes = yield octokit.pulls.listFiles({
-                    "owner": "denoland",
+                    "owner": denoland,
                     "repo": deno_website_repo,
                     "pull_number": pullRequest.number,
                     "pages": 0

@@ -79,7 +79,7 @@ export async function action(
     }
 
 
-    const moduleNameAvailabilityStatus = await checkModuleNameAvailabilityOnDenoLandX({
+    const moduleNameAvailabilityStatus = await checkDenoLandPullRequests({
         "octokit": createOctokit(),
         owner,
         "module_name": repo,
@@ -124,7 +124,7 @@ export async function action(
         await st.exec(`git config --local hub.protocol https`);
         await st.exec(`git config --local user.name "${owner}"`);
 
-        const branch = `add_${repo}_third_party_module`;
+        const branch = `add_${repo}_third_party_module_${Date.now()}`;
 
         await st.exec(`git checkout -b ${branch}`);
 
@@ -205,6 +205,11 @@ export async function action(
 
         await st.exec(`hub fork --remote-name origin`);
 
+        await st.exec([
+            `git remote set-url origin`,
+            `https://${owner}:${process.env["GITHUB_TOKEN"]}@github.com/${owner}/${deno_website_repo}.git`,
+        ].join(" "));
+
         await st.exec(`git push origin ${branch}`);
 
         await st.exec(`hub pull-request -m "` + [
@@ -212,7 +217,7 @@ export async function action(
             ``,
             `https://github.com/${owner}/${repo}`,
             ``,
-            `This is an automatic PR submitted on behalf of ${owner} by [denoify_ci](https://github.com/garronej/denoify_ci/blob/dev/TEMPLATE_README.md)`
+            `This is an automatic PR submitted on behalf of u/${owner} by [denoify_ci](https://github.com/garronej/denoify_ci/blob/dev/TEMPLATE_README.md)`
         ].join("\n") + `"`);
 
         process.chdir(path.join(process.cwd(), ".."));
@@ -231,7 +236,7 @@ export async function action(
 
 }
 
-async function checkModuleNameAvailabilityOnDenoLandX(params: {
+async function checkDenoLandPullRequests(params: {
     octokit: Octokit;
     module_name: string;
     owner: string;
@@ -245,7 +250,7 @@ async function checkModuleNameAvailabilityOnDenoLandX(params: {
 
     const { octokit, core } = params;
 
-    core.debug(`checkModuleNameAvailabilityOnDenoLandX`);
+    core.debug(`Checking ${denoland}/${deno_website_repo} pull requests`);
 
     const { getCommitAsyncIterable } = getCommitAsyncIterableFactory({ octokit });
 
@@ -253,7 +258,7 @@ async function checkModuleNameAvailabilityOnDenoLandX(params: {
         const pullRequest
         of
         getCommitAsyncIterable({
-            "owner": "denoland",
+            "owner": denoland,
             "repo": deno_website_repo,
             "state": "all",
         })
@@ -264,7 +269,7 @@ async function checkModuleNameAvailabilityOnDenoLandX(params: {
         }
 
         const database_json_changes = await octokit.pulls.listFiles({
-            "owner": "denoland",
+            "owner": denoland,
             "repo": deno_website_repo,
             "pull_number": pullRequest.number,
             "pages": 0
