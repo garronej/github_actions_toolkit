@@ -275,7 +275,10 @@ async function checkDenoLandPullRequests(params: {
             "pages": 0
         }).then(
             ({ data }) => data.find(
-                ({ filename }) => filename === "src/database.json"
+                ({ filename }) => ( 
+                    filename === "src/database.json" ||
+                    filename === "database.json"
+                )
             )
         );
 

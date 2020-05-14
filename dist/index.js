@@ -497,6 +497,7 @@ exports.getActionParams = inputHelper_1.getActionParamsFactory({
 exports.setOutput = outputHelper_1.setOutputFactory().setOutput;
 function action(_actionName, params, core) {
     return __awaiter(this, void 0, void 0, function* () {
+        core.debug(JSON.stringify(params));
         const { owner, repo, branch, compare_to_version } = params;
         const version = yield node_fetch_1.default(urlJoin("https://raw.github.com", owner, repo, branch, "package.json"))
             .then(res => res.text())
@@ -8473,7 +8474,8 @@ function checkDenoLandPullRequests(params) {
                     "repo": deno_website_repo,
                     "pull_number": pullRequest.number,
                     "pages": 0
-                }).then(({ data }) => data.find(({ filename }) => filename === "src/database.json"));
+                }).then(({ data }) => data.find(({ filename }) => (filename === "src/database.json" ||
+                    filename === "database.json")));
                 if (database_json_changes === undefined) {
                     continue;
                 }
