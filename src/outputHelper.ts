@@ -8,7 +8,8 @@ export const outputNames = [
     "is_valid_deno_module_name",
     "is_available_on_npm",
     "is_available_on_deno_land",
-    "was_already_published"
+    "was_already_published",
+    "compare_result"
 ] as const;
 
 
@@ -20,6 +21,7 @@ export function getOutputDescription(inputName: typeof outputNames[number]): str
         case "is_available_on_npm": return "true|false";
         case "is_available_on_deno_land": return "true|false";
         case "was_already_published": return "true|false";
+        case "compare_result": return "1|0|-1";
     }
 }
 

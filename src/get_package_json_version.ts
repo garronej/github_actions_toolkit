@@ -2,6 +2,7 @@
 import fetch from "node-fetch";
 const urlJoin: typeof import("path").join = require("url-join");
 import { setOutputFactory } from "./outputHelper";
+import { NpmModuleVersion } from "./tools/NpmModuleVersion";
 
 import { getActionParamsFactory } from "./inputHelper";
 
@@ -9,7 +10,8 @@ export const { getActionParams } = getActionParamsFactory({
     "inputNameSubset": [
         "owner",
         "repo",
-        "branch"
+        "branch",
+        "compare_to_version"
     ] as const
 });
 
@@ -19,7 +21,7 @@ type CoreLike = {
     debug: (message: string) => void;
 };
 
-export const { setOutput } = setOutputFactory<"version">();
+export const { setOutput } = setOutputFactory<"version" | "compare_result">();
 
 export async function action(
     _actionName: "get_package_json_version",
@@ -27,7 +29,7 @@ export async function action(
     core: CoreLike
 ): Promise<Parameters<typeof setOutput>[0]> {
 
-    const { owner, repo, branch } = params;
+    const { owner, repo, branch, compare_to_version } = params;
 
     const version = await fetch(
         urlJoin(
@@ -46,6 +48,12 @@ export async function action(
 
     core.debug(`Version on ${owner}/${repo}#${branch} is ${version}`);
 
-    return { version };
+    return { 
+        version,
+        "compare_result": NpmModuleVersion.compare(
+        NpmModuleVersion.parse(version), 
+        NpmModuleVersion.parse(compare_to_version)
+    ).toString()
+    };
 
 }

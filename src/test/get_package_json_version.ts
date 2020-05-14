@@ -5,15 +5,16 @@ import { action } from "../get_package_json_version";
 
 (async () => {
 
-    const repo = "congenial_pancake";
+    const repo = "denoify";
 
-    const { version } = await action("get_package_json_version", {
+    const result = await action("get_package_json_version", {
         "owner": "garronej",
         repo,
-        "branch": "969297e9b5dcd934d57921a363106e5ff45881c0"
+        "branch": "aa5da60301bea4cf0e80e98a4579f7076b544a44",
+        "compare_to_version": "0.0.0"
     }, { "debug": console.log });
 
-    console.log({ version });
+    console.log(result);
 
 
 })();

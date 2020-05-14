@@ -68,7 +68,8 @@ export async function action(
                     {
                         owner,
                         repo,
-                        branch
+                        branch,
+                        "compare_to_version": "0.0.0"
                     },
                     core
                 ).then(({ version }) => version)

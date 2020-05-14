@@ -484,25 +484,30 @@ exports.action = exports.setOutput = exports.getActionParams = void 0;
 const node_fetch_1 = __importDefault(__webpack_require__(454));
 const urlJoin = __webpack_require__(683);
 const outputHelper_1 = __webpack_require__(762);
+const NpmModuleVersion_1 = __webpack_require__(395);
 const inputHelper_1 = __webpack_require__(649);
 exports.getActionParams = inputHelper_1.getActionParamsFactory({
     "inputNameSubset": [
         "owner",
         "repo",
-        "branch"
+        "branch",
+        "compare_to_version"
     ]
 }).getActionParams;
 exports.setOutput = outputHelper_1.setOutputFactory().setOutput;
 function action(_actionName, params, core) {
     return __awaiter(this, void 0, void 0, function* () {
-        const { owner, repo, branch } = params;
+        const { owner, repo, branch, compare_to_version } = params;
         const version = yield node_fetch_1.default(urlJoin("https://raw.github.com", owner, repo, branch, "package.json"))
             .then(res => res.text())
             .then(text => JSON.parse(text))
             .then(({ version }) => version)
             .catch(() => "");
         core.debug(`Version on ${owner}/${repo}#${branch} is ${version}`);
-        return { version };
+        return {
+            version,
+            "compare_result": NpmModuleVersion_1.NpmModuleVersion.compare(NpmModuleVersion_1.NpmModuleVersion.parse(version), NpmModuleVersion_1.NpmModuleVersion.parse(compare_to_version)).toString()
+        };
     });
 }
 exports.action = action;
@@ -8565,7 +8570,8 @@ exports.inputNames = [
     "branch_ahead",
     "commit_author_email",
     "exclude_commit_from_author_names_json",
-    "module_name"
+    "module_name",
+    "compare_to_version",
 ];
 exports.availableActions = [
     "get_package_json_version",
@@ -8611,6 +8617,13 @@ function getInputDescription(inputName) {
         case "module_name": return [
             `A candidate module name, Example: lodash`
         ].join("");
+        case "compare_to_version": return [
+            `For get_package_json_version, a version against which comparing the result`,
+            `if found version more recent than compare_to_version compare_result is 1`,
+            `if found version is equal to compare_to_version compare_result is 0`,
+            `if found version is older to compare_to_version compare_result -1`,
+            `Example: 0.1.3`
+        ].join(" ");
     }
 }
 exports.getInputDescription = getInputDescription;
@@ -8969,7 +8982,8 @@ function action(_actionName, params, core) {
             .map(branch => get_package_json_version.action("get_package_json_version", {
             owner,
             repo,
-            branch
+            branch,
+            "compare_to_version": "0.0.0"
         }, core).then(({ version }) => version)));
         const bumpType = NpmModuleVersion_1.NpmModuleVersion.bumpType({
             "versionAheadStr": branchAheadVersion,
@@ -9392,7 +9406,8 @@ exports.outputNames = [
     "is_valid_deno_module_name",
     "is_available_on_npm",
     "is_available_on_deno_land",
-    "was_already_published"
+    "was_already_published",
+    "compare_result"
 ];
 function getOutputDescription(inputName) {
     switch (inputName) {
@@ -9402,6 +9417,7 @@ function getOutputDescription(inputName) {
         case "is_available_on_npm": return "true|false";
         case "is_available_on_deno_land": return "true|false";
         case "was_already_published": return "true|false";
+        case "compare_result": return "1|0|-1";
     }
 }
 exports.getOutputDescription = getOutputDescription;

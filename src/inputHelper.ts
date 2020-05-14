@@ -12,7 +12,8 @@ export const inputNames = [
     "branch_ahead",
     "commit_author_email",
     "exclude_commit_from_author_names_json",
-    "module_name"
+    "module_name",
+    "compare_to_version",
 ] as const;
 
 export const availableActions = [
@@ -61,6 +62,13 @@ export function getInputDescription(inputName: typeof inputNames[number]): strin
         case "module_name": return [
             `A candidate module name, Example: lodash`
         ].join("");
+        case "compare_to_version": return [
+            `For get_package_json_version, a version against which comparing the result`,
+            `if found version more recent than compare_to_version compare_result is 1`,
+            `if found version is equal to compare_to_version compare_result is 0`,
+            `if found version is older to compare_to_version compare_result -1`,
+            `Example: 0.1.3`
+        ].join(" ");
     }
 }
 
