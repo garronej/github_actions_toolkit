@@ -8399,7 +8399,7 @@ function action(_actionName, params, core) {
             yield st.exec(`git config --local user.name "${owner}"`);
             const branch = `add_${repo}_third_party_module_${Date.now()}`;
             yield st.exec(`git checkout -b ${branch}`);
-            const databaseFilePath = path.join("src", "database.json");
+            const databaseFilePath = "database.json";
             let databaseJsonParsed = JSON.parse(fs.readFileSync(databaseFilePath).toString("utf8"));
             const moduleNames = Object.keys(databaseJsonParsed);
             if (moduleNames.indexOf(repo) >= 0) {

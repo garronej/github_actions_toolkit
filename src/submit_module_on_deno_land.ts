@@ -128,7 +128,7 @@ export async function action(
 
         await st.exec(`git checkout -b ${branch}`);
 
-        const databaseFilePath = path.join("src", "database.json");
+        const databaseFilePath = "database.json";
 
         let databaseJsonParsed = JSON.parse(
             fs.readFileSync(databaseFilePath).toString("utf8")
