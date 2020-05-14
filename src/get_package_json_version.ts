@@ -51,7 +51,7 @@ export async function action(
     return { 
         version,
         "compare_result": NpmModuleVersion.compare(
-        NpmModuleVersion.parse(version), 
+        NpmModuleVersion.parse(version || "0.0.0"), 
         NpmModuleVersion.parse(compare_to_version)
     ).toString()
     };

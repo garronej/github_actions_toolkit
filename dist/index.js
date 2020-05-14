@@ -506,7 +506,7 @@ function action(_actionName, params, core) {
         core.debug(`Version on ${owner}/${repo}#${branch} is ${version}`);
         return {
             version,
-            "compare_result": NpmModuleVersion_1.NpmModuleVersion.compare(NpmModuleVersion_1.NpmModuleVersion.parse(version), NpmModuleVersion_1.NpmModuleVersion.parse(compare_to_version)).toString()
+            "compare_result": NpmModuleVersion_1.NpmModuleVersion.compare(NpmModuleVersion_1.NpmModuleVersion.parse(version || "0.0.0"), NpmModuleVersion_1.NpmModuleVersion.parse(compare_to_version)).toString()
         };
     });
 }
