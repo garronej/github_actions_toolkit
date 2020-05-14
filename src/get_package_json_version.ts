@@ -29,6 +29,8 @@ export async function action(
     core: CoreLike
 ): Promise<Parameters<typeof setOutput>[0]> {
 
+    core.debug(JSON.stringify(params));
+
     const { owner, repo, branch, compare_to_version } = params;
 
     const version = await fetch(
