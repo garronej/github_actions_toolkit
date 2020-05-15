@@ -9,11 +9,11 @@ export type PullRequest = AsyncReturnType<Octokit["pulls"]["list"]>["data"][numb
 
 const per_page = 99;
 
-export function getCommitAsyncIterableFactory(params: { octokit: Octokit; }) {
+export function getPullRequestAsyncIterableFactory(params: { octokit: Octokit; }) {
 
     const { octokit } = params;
 
-    function getCommitAsyncIterable(
+    function getPullRequestAsyncIterable(
         params: {
             owner: string;
             repo: string;
@@ -83,7 +83,7 @@ export function getCommitAsyncIterableFactory(params: { octokit: Octokit; }) {
 
     }
 
-    return { getCommitAsyncIterable };
+    return { getPullRequestAsyncIterable };
 
 }
 

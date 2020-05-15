@@ -411,11 +411,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getCommitAsyncIterableFactory = void 0;
+exports.getPullRequestAsyncIterableFactory = void 0;
 const per_page = 99;
-function getCommitAsyncIterableFactory(params) {
+function getPullRequestAsyncIterableFactory(params) {
     const { octokit } = params;
-    function getCommitAsyncIterable(params) {
+    function getPullRequestAsyncIterable(params) {
         const { owner, repo, state } = params;
         let pullRequests = [];
         let page = 0;
@@ -455,9 +455,9 @@ function getCommitAsyncIterableFactory(params) {
             }
         };
     }
-    return { getCommitAsyncIterable };
+    return { getPullRequestAsyncIterable };
 }
-exports.getCommitAsyncIterableFactory = getCommitAsyncIterableFactory;
+exports.getPullRequestAsyncIterableFactory = getPullRequestAsyncIterableFactory;
 
 
 /***/ }),
@@ -8457,9 +8457,9 @@ function checkDenoLandPullRequests(params) {
     return __awaiter(this, void 0, void 0, function* () {
         const { octokit, core } = params;
         core.debug(`Checking ${denoland}/${deno_website_repo} pull requests`);
-        const { getCommitAsyncIterable } = getPullRequestAsyncIterable_1.getCommitAsyncIterableFactory({ octokit });
+        const { getPullRequestAsyncIterable } = getPullRequestAsyncIterable_1.getPullRequestAsyncIterableFactory({ octokit });
         try {
-            for (var _b = __asyncValues(getCommitAsyncIterable({
+            for (var _b = __asyncValues(getPullRequestAsyncIterable({
                 "owner": denoland,
                 "repo": deno_website_repo,
                 "state": "all",

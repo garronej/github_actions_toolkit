@@ -12,7 +12,7 @@ import fetch from "node-fetch";
 const urlJoin: typeof import("path").join = require("url-join");
 import { assert } from "evt/dist/tools/typeSafety";
 import * as is_well_formed_and_available_module_name from "./is_well_formed_and_available_module_name";
-import { getCommitAsyncIterableFactory } from "./tools/octokit-addons/getPullRequestAsyncIterable";
+import { getPullRequestAsyncIterableFactory } from "./tools/octokit-addons/getPullRequestAsyncIterable";
 
 
 export const { getActionParams } = getActionParamsFactory({
@@ -252,12 +252,12 @@ async function checkDenoLandPullRequests(params: {
 
     core.debug(`Checking ${denoland}/${deno_website_repo} pull requests`);
 
-    const { getCommitAsyncIterable } = getCommitAsyncIterableFactory({ octokit });
+    const { getPullRequestAsyncIterable } = getPullRequestAsyncIterableFactory({ octokit });
 
     for await (
         const pullRequest
         of
-        getCommitAsyncIterable({
+        getPullRequestAsyncIterable({
             "owner": denoland,
             "repo": deno_website_repo,
             "state": "all",
