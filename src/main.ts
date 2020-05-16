@@ -69,6 +69,7 @@ async function run(): Promise<void> {
                     core
                 )
             );
+            return;
     }
 
     throw new Error(`${action_name} Not supported by this toolkit`);
