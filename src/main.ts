@@ -71,7 +71,7 @@ async function run(): Promise<void> {
             );
     }
 
-    throw new Error(`${action_name} Not supported`);
+    throw new Error(`${action_name} Not supported by this toolkit`);
 
 }
 
