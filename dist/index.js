@@ -901,6 +901,7 @@ const dispatch_event = __importStar(__webpack_require__(863));
 const sync_package_and_package_lock_version = __importStar(__webpack_require__(830));
 const submit_module_on_deno_land = __importStar(__webpack_require__(623));
 const is_well_formed_and_available_module_name = __importStar(__webpack_require__(794));
+const string_replace = __importStar(__webpack_require__(599));
 const inputHelper_1 = __webpack_require__(649);
 const update_changelog = __importStar(__webpack_require__(702));
 function run() {
@@ -925,6 +926,8 @@ function run() {
             case "is_well_formed_and_available_module_name":
                 is_well_formed_and_available_module_name.setOutput(yield is_well_formed_and_available_module_name.action(action_name, is_well_formed_and_available_module_name.getActionParams(), core));
                 return;
+            case "string_replace":
+                string_replace.setOutput(yield string_replace.action(action_name, string_replace.getActionParams(), core));
         }
         throw new Error(`${action_name} Not supported`);
     });
@@ -8200,6 +8203,46 @@ module.exports = parse;
 
 /***/ }),
 
+/***/ 599:
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.action = exports.setOutput = exports.getActionParams = void 0;
+const outputHelper_1 = __webpack_require__(762);
+const inputHelper_1 = __webpack_require__(649);
+exports.getActionParams = inputHelper_1.getActionParamsFactory({
+    "inputNameSubset": [
+        "input_string",
+        "search_value",
+        "replace_value"
+    ]
+}).getActionParams;
+exports.setOutput = outputHelper_1.setOutputFactory().setOutput;
+function action(_actionName, params, core) {
+    return __awaiter(this, void 0, void 0, function* () {
+        core.debug(JSON.stringify(params));
+        const { input_string, search_value, replace_value } = params;
+        return {
+            "replace_result": input_string.replace(new RegExp(search_value, "g"), replace_value)
+        };
+    });
+}
+exports.action = action;
+
+
+/***/ }),
+
 /***/ 601:
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -8573,6 +8616,9 @@ exports.inputNames = [
     "exclude_commit_from_author_names_json",
     "module_name",
     "compare_to_version",
+    "input_string",
+    "search_value",
+    "replace_value"
 ];
 exports.availableActions = [
     "get_package_json_version",
@@ -8580,7 +8626,8 @@ exports.availableActions = [
     "update_changelog",
     "sync_package_and_package_lock_version",
     "submit_module_on_deno_land",
-    "is_well_formed_and_available_module_name"
+    "is_well_formed_and_available_module_name",
+    "string_replace"
 ];
 function getInputDescription(inputName) {
     switch (inputName) {
@@ -8625,6 +8672,9 @@ function getInputDescription(inputName) {
             `if found version is older to compare_to_version compare_result -1`,
             `Example: 0.1.3`
         ].join(" ");
+        case "input_string": return `For string_replace, the string to replace`;
+        case "search_value": return `For string_replace, Example '-' ( Will be used as arg for RegExp constructor )`;
+        case "replace_value": return `For string_replace, Example '_'`;
     }
 }
 exports.getInputDescription = getInputDescription;
@@ -9408,7 +9458,8 @@ exports.outputNames = [
     "is_available_on_npm",
     "is_available_on_deno_land",
     "was_already_published",
-    "compare_result"
+    "compare_result",
+    "replace_result"
 ];
 function getOutputDescription(inputName) {
     switch (inputName) {
@@ -9419,6 +9470,7 @@ function getOutputDescription(inputName) {
         case "is_available_on_deno_land": return "true|false";
         case "was_already_published": return "true|false";
         case "compare_result": return "1|0|-1";
+        case "replace_result": return "Output of string_replace";
     }
 }
 exports.getOutputDescription = getOutputDescription;

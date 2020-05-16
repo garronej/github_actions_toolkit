@@ -14,6 +14,9 @@ export const inputNames = [
     "exclude_commit_from_author_names_json",
     "module_name",
     "compare_to_version",
+    "input_string",
+    "search_value",
+    "replace_value"
 ] as const;
 
 export const availableActions = [
@@ -22,7 +25,8 @@ export const availableActions = [
     "update_changelog",
     "sync_package_and_package_lock_version",
     "submit_module_on_deno_land",
-    "is_well_formed_and_available_module_name"
+    "is_well_formed_and_available_module_name",
+    "string_replace"
 ] as const;
 
 
@@ -69,6 +73,9 @@ export function getInputDescription(inputName: typeof inputNames[number]): strin
             `if found version is older to compare_to_version compare_result -1`,
             `Example: 0.1.3`
         ].join(" ");
+        case "input_string": return `For string_replace, the string to replace`;
+        case "search_value": return `For string_replace, Example '-' ( Will be used as arg for RegExp constructor )`;
+        case "replace_value": return `For string_replace, Example '_'`;
     }
 }
 

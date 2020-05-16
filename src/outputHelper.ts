@@ -9,7 +9,8 @@ export const outputNames = [
     "is_available_on_npm",
     "is_available_on_deno_land",
     "was_already_published",
-    "compare_result"
+    "compare_result",
+    "replace_result"
 ] as const;
 
 
@@ -22,6 +23,7 @@ export function getOutputDescription(inputName: typeof outputNames[number]): str
         case "is_available_on_deno_land": return "true|false";
         case "was_already_published": return "true|false";
         case "compare_result": return "1|0|-1";
+        case "replace_result": return "Output of string_replace";
     }
 }
 
