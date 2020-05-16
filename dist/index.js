@@ -9030,7 +9030,11 @@ function action(_actionName, params, core) {
             repo,
             "branchBehind": branch_behind,
             "branchAhead": branch_ahead
-        });
+        }).catch(() => ({ "commits": undefined }));
+        if (commits === undefined) {
+            core.warning(`${branch_behind} probably does not exist`);
+            return;
+        }
         const [branchBehindVersion, branchAheadVersion] = yield Promise.all([branch_behind, branch_ahead]
             .map(branch => get_package_json_version.action("get_package_json_version", {
             owner,

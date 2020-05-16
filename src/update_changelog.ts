@@ -24,6 +24,7 @@ export type Params = ReturnType<typeof getActionParams>;
 
 type CoreLike = {
     debug: (message: string) => void;
+    warning: (message: string)=> void;
 };
 
 export async function action(
@@ -55,7 +56,15 @@ export async function action(
         repo,
         "branchBehind": branch_behind,
         "branchAhead": branch_ahead
-    });
+    }).catch(() => ({ "commits": undefined }));
+
+    if( commits === undefined ){
+
+        core.warning(`${branch_behind} probably does not exist`);
+
+        return;
+
+    }
 
     const [
         branchBehindVersion,
