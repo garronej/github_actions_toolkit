@@ -9951,7 +9951,7 @@ function action(_actionName, params, core) {
                 fs.writeFileSync("package-lock.json", Buffer.from(JSON.stringify((() => {
                     packageLockJsonParsed.version = version;
                     return packageLockJsonParsed;
-                })(), null, 4) + "\n", "utf8"));
+                })(), null, 2) + "\n", "utf8"));
                 return {
                     "commit": true,
                     "addAll": false,

@@ -65,7 +65,7 @@ export async function action(
                             return packageLockJsonParsed;
                         })(),
                         null,
-                        4
+                        2
                     ) + "\n",
                     "utf8"
                 )
