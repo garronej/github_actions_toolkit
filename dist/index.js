@@ -7822,8 +7822,15 @@ function gitCommit(params) {
         yield st.exec(`git clone https://github.com/${owner}/${repo}`);
         const cwd = process.cwd();
         process.chdir(repo);
-        const changesResult = yield performChanges();
-        if (changesResult.commit) {
+        const changesResult = yield (() => __awaiter(this, void 0, void 0, function* () {
+            try {
+                return yield performChanges();
+            }
+            catch (error) {
+                return error;
+            }
+        }))();
+        if (!(changesResult instanceof Error) && changesResult.commit) {
             yield st.exec(`git config --local user.email "${commitAuthorEmail}"`);
             yield st.exec(`git config --local user.name "${commitAuthorEmail.split("@")[0]}"`);
             if (changesResult.addAll) {
@@ -7834,6 +7841,9 @@ function gitCommit(params) {
         }
         process.chdir(cwd);
         yield st.exec(`rm -r ${repo}`);
+        if (changesResult instanceof Error) {
+            throw changesResult;
+        }
     });
 }
 exports.gitCommit = gitCommit;
@@ -9946,8 +9956,9 @@ function action(_actionName, params, core) {
                     core.debug(`No package-lock.json tracked by ${owner}/${repo}#${branch}`);
                     return { "commit": false };
                 }
-                const packageLockJsonParsed = JSON.parse(fs.readFileSync("package-lock.json")
-                    .toString("utf8"));
+                const packageLockJsonRaw = fs.readFileSync("package-lock.json")
+                    .toString("utf8");
+                const packageLockJsonParsed = JSON.parse(packageLockJsonRaw);
                 if (packageLockJsonParsed.version === version) {
                     core.debug("Nothing to do, version in package.json and package-lock.json are the same");
                     return { "commit": false };
@@ -9955,7 +9966,9 @@ function action(_actionName, params, core) {
                 fs.writeFileSync("package-lock.json", Buffer.from(JSON.stringify((() => {
                     packageLockJsonParsed.version = version;
                     return packageLockJsonParsed;
-                })(), null, 2) + "\n", "utf8"));
+                })(), null, packageLockJsonRaw
+                    .replace(/\t/g, "    ")
+                    .match(/^(\s*)\"version\"/m)[1].length) + "\n", "utf8"));
                 return {
                     "commit": true,
                     "addAll": false,

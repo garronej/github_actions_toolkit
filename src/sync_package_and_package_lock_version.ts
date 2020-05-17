@@ -46,9 +46,12 @@ export async function action(
                 return { "commit": false };
             }
 
+            const packageLockJsonRaw = fs.readFileSync("package-lock.json")
+                .toString("utf8")
+                ;
+
             const packageLockJsonParsed = JSON.parse(
-                fs.readFileSync("package-lock.json")
-                    .toString("utf8")
+                packageLockJsonRaw
             );
 
             if (packageLockJsonParsed.version === version) {
@@ -65,7 +68,9 @@ export async function action(
                             return packageLockJsonParsed;
                         })(),
                         null,
-                        2
+                        packageLockJsonRaw
+                            .replace(/\t/g, "    ")
+                            .match(/^(\s*)\"version\"/m)![1].length
                     ) + "\n",
                     "utf8"
                 )

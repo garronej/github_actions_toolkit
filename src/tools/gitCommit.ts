@@ -1,14 +1,11 @@
-
 import * as st from "scripting-tools";
-import * as path from "path";
-import { assert } from "evt/dist/tools/typeSafety/assert";
 
 export async function gitCommit(
     params: {
         owner: string;
         repo: string;
         commitAuthorEmail: string;
-        performChanges: ()=> Promise<{ commit: false; } | { commit: true; addAll: boolean; message: string; }>
+        performChanges: () => Promise<{ commit: false; } | { commit: true; addAll: boolean; message: string; }>
 
     }
 ) {
@@ -21,14 +18,26 @@ export async function gitCommit(
 
     process.chdir(repo);
 
-    const changesResult= await performChanges();
+    const changesResult = await (async () => {
 
-    if( changesResult.commit ){
+        try {
+
+            return await performChanges();
+
+        } catch (error) {
+
+            return error as Error;
+
+        }
+
+    })()
+
+    if (!(changesResult instanceof Error) && changesResult.commit) {
 
         await st.exec(`git config --local user.email "${commitAuthorEmail}"`);
         await st.exec(`git config --local user.name "${commitAuthorEmail.split("@")[0]}"`);
 
-        if( changesResult.addAll ){
+        if (changesResult.addAll) {
 
             await st.exec(`git add -A`);
 
@@ -43,5 +52,9 @@ export async function gitCommit(
     process.chdir(cwd);
 
     await st.exec(`rm -r ${repo}`);
+
+    if (changesResult instanceof Error) {
+        throw changesResult;
+    }
 
 }
