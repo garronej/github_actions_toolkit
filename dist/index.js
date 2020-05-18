@@ -9014,7 +9014,6 @@ const getCommitAhead_1 = __webpack_require__(438);
 const get_package_json_version = __importStar(__webpack_require__(43));
 const fs = __importStar(__webpack_require__(747));
 const NpmModuleVersion_1 = __webpack_require__(395);
-const typeSafety_1 = __webpack_require__(601);
 const createOctokit_1 = __webpack_require__(906);
 const gitCommit_1 = __webpack_require__(503);
 exports.getActionParams = inputHelper_1.getActionParamsFactory({
@@ -9055,7 +9054,10 @@ function action(_actionName, params, core) {
             "versionAheadStr": branchAheadVersion,
             "versionBehindStr": branchBehindVersion || "0.0.0"
         });
-        typeSafety_1.assert(bumpType !== "SAME", "Version is supposed to be updated");
+        if (bumpType === "SAME") {
+            core.warning(`Version on ${branch_ahead} and ${branch_behind} are the same, not editing CHANGELOG.md`);
+            return;
+        }
         yield gitCommit_1.gitCommit({
             owner,
             repo,
@@ -9072,7 +9074,9 @@ function action(_actionName, params, core) {
                     "body": commits
                         .reverse()
                         .filter(({ commit }) => !exclude_commit_from_author_names.includes(commit.author.name))
-                        .map(({ commit }) => `- ${commit.message}  `)
+                        .map(({ commit }) => commit.message)
+                        .filter(message => !/changelog/i.test(message))
+                        .map(message => `- ${message}  `)
                         .join("\n")
                 });
                 core.debug(`CHANGELOG.md: ${changelogRaw}`);

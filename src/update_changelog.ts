@@ -91,7 +91,13 @@ export async function action(
         "versionBehindStr": branchBehindVersion || "0.0.0"
     });
 
-    assert(bumpType !== "SAME", "Version is supposed to be updated");
+    if( bumpType === "SAME" ){
+
+        core.warning(`Version on ${branch_ahead} and ${branch_behind} are the same, not editing CHANGELOG.md`);
+
+        return;
+
+    }
 
 
     await gitCommit({
@@ -113,7 +119,9 @@ export async function action(
                 "body": commits
                     .reverse()
                     .filter(({ commit }) => !exclude_commit_from_author_names.includes(commit.author.name))
-                    .map(({ commit }) => `- ${commit.message}  `)
+                    .map(({ commit }) => commit.message)
+                    .filter(message => !/changelog/i.test(message))
+                    .map(message => `- ${message}  `)
                     .join("\n")
             });
 
