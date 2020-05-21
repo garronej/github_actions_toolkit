@@ -121,6 +121,7 @@ export async function action(
                     .filter(({ commit }) => !exclude_commit_from_author_names.includes(commit.author.name))
                     .map(({ commit }) => commit.message)
                     .filter(message => !/changelog/i.test(message))
+                    .filter(message => !/^Merge branch /.test(message))
                     .map(message => `- ${message}  `)
                     .join("\n")
             });
