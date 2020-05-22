@@ -99,7 +99,6 @@ export async function action(
 
     }
 
-
     await gitCommit({
         owner,
         repo,
@@ -122,6 +121,7 @@ export async function action(
                     .map(({ commit }) => commit.message)
                     .filter(message => !/changelog/i.test(message))
                     .filter(message => !/^Merge branch /.test(message))
+                    .filter(message => !/^GitBook: /.test(message))
                     .map(message => `- ${message}  `)
                     .join("\n")
             });

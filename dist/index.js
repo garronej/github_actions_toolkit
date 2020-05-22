@@ -9077,6 +9077,7 @@ function action(_actionName, params, core) {
                         .map(({ commit }) => commit.message)
                         .filter(message => !/changelog/i.test(message))
                         .filter(message => !/^Merge branch /.test(message))
+                        .filter(message => !/^GitBook: /.test(message))
                         .map(message => `- ${message}  `)
                         .join("\n")
                 });
