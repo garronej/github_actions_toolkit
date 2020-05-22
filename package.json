@@ -1,6 +1,6 @@
 {
   "name": "github_actions_toolkit",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "private": true,
   "description": "A collection of github actions",
   "main": "lib/main.js",
@@ -24,7 +24,7 @@
     "evt": "1.6.8",
     "glob": "^7.1.6",
     "node-fetch": "^2.6.0",
-    "scripting-tools": "github:garronej/scripting-tools",
+    "scripting-tools": "^0.19.12",
     "url-join": "^4.0.1",
     "validate-npm-package-name": "^3.0.0"
   },

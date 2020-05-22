@@ -2620,7 +2620,7 @@ function coerce (version) {
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-const VERSION = "2.2.0";
+const VERSION = "2.2.1";
 
 /**
  * Some “list” response that can be paginated have a different response structure
@@ -5523,117 +5523,174 @@ var request = __webpack_require__(753);
 var graphql = __webpack_require__(898);
 var authToken = __webpack_require__(813);
 
-const VERSION = "2.5.0";
+function _defineProperty(obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
 
-class Octokit {
-  constructor(options = {}) {
-    const hook = new beforeAfterHook.Collection();
-    const requestDefaults = {
-      baseUrl: request.request.endpoint.DEFAULTS.baseUrl,
-      headers: {},
-      request: Object.assign({}, options.request, {
-        hook: hook.bind(null, "request")
-      }),
-      mediaType: {
-        previews: [],
-        format: ""
+  return obj;
+}
+
+function ownKeys(object, enumerableOnly) {
+  var keys = Object.keys(object);
+
+  if (Object.getOwnPropertySymbols) {
+    var symbols = Object.getOwnPropertySymbols(object);
+    if (enumerableOnly) symbols = symbols.filter(function (sym) {
+      return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+    });
+    keys.push.apply(keys, symbols);
+  }
+
+  return keys;
+}
+
+function _objectSpread2(target) {
+  for (var i = 1; i < arguments.length; i++) {
+    var source = arguments[i] != null ? arguments[i] : {};
+
+    if (i % 2) {
+      ownKeys(Object(source), true).forEach(function (key) {
+        _defineProperty(target, key, source[key]);
+      });
+    } else if (Object.getOwnPropertyDescriptors) {
+      Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
+    } else {
+      ownKeys(Object(source)).forEach(function (key) {
+        Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+      });
+    }
+  }
+
+  return target;
+}
+
+const VERSION = "2.5.3";
+
+let Octokit =
+/** @class */
+(() => {
+  class Octokit {
+    constructor(options = {}) {
+      const hook = new beforeAfterHook.Collection();
+      const requestDefaults = {
+        baseUrl: request.request.endpoint.DEFAULTS.baseUrl,
+        headers: {},
+        request: Object.assign({}, options.request, {
+          hook: hook.bind(null, "request")
+        }),
+        mediaType: {
+          previews: [],
+          format: ""
+        }
+      }; // prepend default user agent with `options.userAgent` if set
+
+      requestDefaults.headers["user-agent"] = [options.userAgent, `octokit-core.js/${VERSION} ${universalUserAgent.getUserAgent()}`].filter(Boolean).join(" ");
+
+      if (options.baseUrl) {
+        requestDefaults.baseUrl = options.baseUrl;
       }
-    }; // prepend default user agent with `options.userAgent` if set
 
-    requestDefaults.headers["user-agent"] = [options.userAgent, `octokit-core.js/${VERSION} ${universalUserAgent.getUserAgent()}`].filter(Boolean).join(" ");
+      if (options.previews) {
+        requestDefaults.mediaType.previews = options.previews;
+      }
 
-    if (options.baseUrl) {
-      requestDefaults.baseUrl = options.baseUrl;
-    }
+      if (options.timeZone) {
+        requestDefaults.headers["time-zone"] = options.timeZone;
+      }
 
-    if (options.previews) {
-      requestDefaults.mediaType.previews = options.previews;
-    }
+      this.request = request.request.defaults(requestDefaults);
+      this.graphql = graphql.withCustomRequest(this.request).defaults(_objectSpread2(_objectSpread2({}, requestDefaults), {}, {
+        baseUrl: requestDefaults.baseUrl.replace(/\/api\/v3$/, "/api")
+      }));
+      this.log = Object.assign({
+        debug: () => {},
+        info: () => {},
+        warn: console.warn.bind(console),
+        error: console.error.bind(console)
+      }, options.log);
+      this.hook = hook; // (1) If neither `options.authStrategy` nor `options.auth` are set, the `octokit` instance
+      //     is unauthenticated. The `this.auth()` method is a no-op and no request hook is registred.
+      // (2) If only `options.auth` is set, use the default token authentication strategy.
+      // (3) If `options.authStrategy` is set then use it and pass in `options.auth`. Always pass own request as many strategies accept a custom request instance.
+      // TODO: type `options.auth` based on `options.authStrategy`.
 
-    if (options.timeZone) {
-      requestDefaults.headers["time-zone"] = options.timeZone;
-    }
+      if (!options.authStrategy) {
+        if (!options.auth) {
+          // (1)
+          this.auth = async () => ({
+            type: "unauthenticated"
+          });
+        } else {
+          // (2)
+          const auth = authToken.createTokenAuth(options.auth); // @ts-ignore  ¯\_(ツ)_/¯
 
-    this.request = request.request.defaults(requestDefaults);
-    this.graphql = graphql.withCustomRequest(this.request).defaults(requestDefaults);
-    this.log = Object.assign({
-      debug: () => {},
-      info: () => {},
-      warn: console.warn.bind(console),
-      error: console.error.bind(console)
-    }, options.log);
-    this.hook = hook; // (1) If neither `options.authStrategy` nor `options.auth` are set, the `octokit` instance
-    //     is unauthenticated. The `this.auth()` method is a no-op and no request hook is registred.
-    // (2) If only `options.auth` is set, use the default token authentication strategy.
-    // (3) If `options.authStrategy` is set then use it and pass in `options.auth`. Always pass own request as many strategies accept a custom request instance.
-    // TODO: type `options.auth` based on `options.authStrategy`.
-
-    if (!options.authStrategy) {
-      if (!options.auth) {
-        // (1)
-        this.auth = async () => ({
-          type: "unauthenticated"
-        });
+          hook.wrap("request", auth.hook);
+          this.auth = auth;
+        }
       } else {
-        // (2)
-        const auth = authToken.createTokenAuth(options.auth); // @ts-ignore  ¯\_(ツ)_/¯
+        const auth = options.authStrategy(Object.assign({
+          request: this.request
+        }, options.auth)); // @ts-ignore  ¯\_(ツ)_/¯
 
         hook.wrap("request", auth.hook);
         this.auth = auth;
-      }
-    } else {
-      const auth = options.authStrategy(Object.assign({
-        request: this.request
-      }, options.auth)); // @ts-ignore  ¯\_(ツ)_/¯
-
-      hook.wrap("request", auth.hook);
-      this.auth = auth;
-    } // apply plugins
-    // https://stackoverflow.com/a/16345172
+      } // apply plugins
+      // https://stackoverflow.com/a/16345172
 
 
-    const classConstructor = this.constructor;
-    classConstructor.plugins.forEach(plugin => {
-      Object.assign(this, plugin(this, options));
-    });
-  }
-
-  static defaults(defaults) {
-    const OctokitWithDefaults = class extends this {
-      constructor(...args) {
-        const options = args[0] || {};
-        super(Object.assign({}, defaults, options, options.userAgent && defaults.userAgent ? {
-          userAgent: `${options.userAgent} ${defaults.userAgent}`
-        } : null));
-      }
-
-    };
-    return OctokitWithDefaults;
-  }
-  /**
-   * Attach a plugin (or many) to your Octokit instance.
-   *
-   * @example
-   * const API = Octokit.plugin(plugin1, plugin2, plugin3, ...)
-   */
-
-
-  static plugin(p1, ...p2) {
-    var _a;
-
-    if (p1 instanceof Array) {
-      console.warn(["Passing an array of plugins to Octokit.plugin() has been deprecated.", "Instead of:", "  Octokit.plugin([plugin1, plugin2, ...])", "Use:", "  Octokit.plugin(plugin1, plugin2, ...)"].join("\n"));
+      const classConstructor = this.constructor;
+      classConstructor.plugins.forEach(plugin => {
+        Object.assign(this, plugin(this, options));
+      });
     }
 
-    const currentPlugins = this.plugins;
-    let newPlugins = [...(p1 instanceof Array ? p1 : [p1]), ...p2];
-    const NewOctokit = (_a = class extends this {}, _a.plugins = currentPlugins.concat(newPlugins.filter(plugin => !currentPlugins.includes(plugin))), _a);
-    return NewOctokit;
+    static defaults(defaults) {
+      const OctokitWithDefaults = class extends this {
+        constructor(...args) {
+          const options = args[0] || {};
+          super(Object.assign({}, defaults, options, options.userAgent && defaults.userAgent ? {
+            userAgent: `${options.userAgent} ${defaults.userAgent}`
+          } : null));
+        }
+
+      };
+      return OctokitWithDefaults;
+    }
+    /**
+     * Attach a plugin (or many) to your Octokit instance.
+     *
+     * @example
+     * const API = Octokit.plugin(plugin1, plugin2, plugin3, ...)
+     */
+
+
+    static plugin(p1, ...p2) {
+      var _a;
+
+      if (p1 instanceof Array) {
+        console.warn(["Passing an array of plugins to Octokit.plugin() has been deprecated.", "Instead of:", "  Octokit.plugin([plugin1, plugin2, ...])", "Use:", "  Octokit.plugin(plugin1, plugin2, ...)"].join("\n"));
+      }
+
+      const currentPlugins = this.plugins;
+      let newPlugins = [...(p1 instanceof Array ? p1 : [p1]), ...p2];
+      const NewOctokit = (_a = class extends this {}, _a.plugins = currentPlugins.concat(newPlugins.filter(plugin => !currentPlugins.includes(plugin))), _a);
+      return NewOctokit;
+    }
+
   }
 
-}
-Octokit.VERSION = VERSION;
-Octokit.plugins = [];
+  Octokit.VERSION = VERSION;
+  Octokit.plugins = [];
+  return Octokit;
+})();
 
 exports.Octokit = Octokit;
 //# sourceMappingURL=index.js.map
@@ -8403,19 +8460,19 @@ const getPullRequestAsyncIterable_1 = __webpack_require__(42);
 exports.getActionParams = inputHelper_1.getActionParamsFactory({
     "inputNameSubset": [
         "owner",
-        "repo",
-        "commit_author_email"
+        "repo"
     ]
 }).getActionParams;
 const deno_website_repo = "deno_website2";
-const denoland = "cahuzacf";
+//NOTE: Enable to test without submitting PR on the real repo.
+const getDenoWebsiteRepoOwner = () => { var _a; return (_a = process.env["DENO_WEBSITE_REPO_OWNER"]) !== null && _a !== void 0 ? _a : "denoland"; };
 exports.setOutput = outputHelper_1.setOutputFactory().setOutput;
 function action(_actionName, params, core) {
     return __awaiter(this, void 0, void 0, function* () {
-        const { owner, repo, commit_author_email } = params;
+        const { owner, repo } = params;
         const { is_available_on_deno_land } = yield is_well_formed_and_available_module_name.action("is_well_formed_and_available_module_name", { "module_name": repo }, core);
         if (!is_available_on_deno_land) {
-            const databaseJsonParsed = yield node_fetch_1.default(urlJoin("https://raw.github.com", denoland, deno_website_repo, "master", "src", "database.json"))
+            const databaseJsonParsed = yield node_fetch_1.default(urlJoin("https://raw.github.com", getDenoWebsiteRepoOwner(), deno_website_repo, "master", "src", "database.json"))
                 .then(res => res.text())
                 .then(text => JSON.parse(text));
             const entry = databaseJsonParsed[repo];
@@ -8444,7 +8501,7 @@ function action(_actionName, params, core) {
         if (!st.apt_get_install_if_missing.doesHaveProg("hub")) {
             yield st.exec("curl -fsSL https://github.com/github/hub/raw/master/script/get | bash -s 2.14.1");
         }
-        yield st.exec(`hub clone ${denoland}/${deno_website_repo}`);
+        yield st.exec(`hub clone ${getDenoWebsiteRepoOwner()}/${deno_website_repo}`);
         const repoPath = path.join(process.cwd(), deno_website_repo);
         try {
             process.chdir(repoPath);
@@ -8510,11 +8567,11 @@ function checkDenoLandPullRequests(params) {
     var e_1, _a;
     return __awaiter(this, void 0, void 0, function* () {
         const { octokit, core } = params;
-        core.debug(`Checking ${denoland}/${deno_website_repo} pull requests`);
+        core.debug(`Checking ${getDenoWebsiteRepoOwner()}/${deno_website_repo} pull requests`);
         const { getPullRequestAsyncIterable } = getPullRequestAsyncIterable_1.getPullRequestAsyncIterableFactory({ octokit });
         try {
             for (var _b = __asyncValues(getPullRequestAsyncIterable({
-                "owner": denoland,
+                "owner": getDenoWebsiteRepoOwner(),
                 "repo": deno_website_repo,
                 "state": "all",
             })), _c; _c = yield _b.next(), !_c.done;) {
@@ -8523,7 +8580,7 @@ function checkDenoLandPullRequests(params) {
                     continue;
                 }
                 const database_json_changes = yield octokit.pulls.listFiles({
-                    "owner": denoland,
+                    "owner": getDenoWebsiteRepoOwner(),
                     "repo": deno_website_repo,
                     "pull_number": pullRequest.number,
                     "pages": 0
@@ -9297,7 +9354,7 @@ var isPlainObject = _interopDefault(__webpack_require__(696));
 var nodeFetch = _interopDefault(__webpack_require__(454));
 var requestError = __webpack_require__(463);
 
-const VERSION = "5.4.2";
+const VERSION = "5.4.3";
 
 function getBufferResponse(response) {
   return response.arrayBuffer();
@@ -10005,8 +10062,20 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 const Endpoints = {
   actions: {
+    addSelectedRepoToOrgSecret: ["PUT /orgs/{org}/actions/secrets/{secret_name}/repositories/{repository_id}"],
     cancelWorkflowRun: ["POST /repos/{owner}/{repo}/actions/runs/{run_id}/cancel"],
-    createOrUpdateSecretForRepo: ["PUT /repos/{owner}/{repo}/actions/secrets/{name}"],
+    createOrUpdateOrgSecret: ["PUT /orgs/{org}/actions/secrets/{secret_name}"],
+    createOrUpdateRepoSecret: ["PUT /repos/{owner}/{repo}/actions/secrets/{secret_name}", {}, {
+      renamedParameters: {
+        name: "secret_name"
+      }
+    }],
+    createOrUpdateSecretForRepo: ["PUT /repos/{owner}/{repo}/actions/secrets/{secret_name}", {}, {
+      renamed: ["actions", "createOrUpdateRepoSecret"],
+      renamedParameters: {
+        name: "secret_name"
+      }
+    }],
     createRegistrationToken: ["POST /repos/{owner}/{repo}/actions/runners/registration-token", {}, {
       renamed: ["actions", "createRegistrationTokenForRepo"]
     }],
@@ -10018,7 +10087,18 @@ const Endpoints = {
     createRemoveTokenForOrg: ["POST /orgs/{org}/actions/runners/remove-token"],
     createRemoveTokenForRepo: ["POST /repos/{owner}/{repo}/actions/runners/remove-token"],
     deleteArtifact: ["DELETE /repos/{owner}/{repo}/actions/artifacts/{artifact_id}"],
-    deleteSecretFromRepo: ["DELETE /repos/{owner}/{repo}/actions/secrets/{name}"],
+    deleteOrgSecret: ["DELETE /orgs/{org}/actions/secrets/{secret_name}"],
+    deleteRepoSecret: ["DELETE /repos/{owner}/{repo}/actions/secrets/{secret_name}", {}, {
+      renamedParameters: {
+        name: "secret_name"
+      }
+    }],
+    deleteSecretFromRepo: ["DELETE /repos/{owner}/{repo}/actions/secrets/{secret_name}", {}, {
+      renamed: ["actions", "deleteRepoSecret"],
+      renamedParameters: {
+        name: "secret_name"
+      }
+    }],
     deleteSelfHostedRunnerFromOrg: ["DELETE /orgs/{org}/actions/runners/{runner_id}"],
     deleteSelfHostedRunnerFromRepo: ["DELETE /repos/{owner}/{repo}/actions/runners/{runner_id}"],
     deleteWorkflowRunLogs: ["DELETE /repos/{owner}/{repo}/actions/runs/{run_id}/logs"],
@@ -10026,8 +10106,23 @@ const Endpoints = {
     downloadWorkflowJobLogs: ["GET /repos/{owner}/{repo}/actions/jobs/{job_id}/logs"],
     downloadWorkflowRunLogs: ["GET /repos/{owner}/{repo}/actions/runs/{run_id}/logs"],
     getArtifact: ["GET /repos/{owner}/{repo}/actions/artifacts/{artifact_id}"],
-    getPublicKey: ["GET /repos/{owner}/{repo}/actions/secrets/public-key"],
-    getSecret: ["GET /repos/{owner}/{repo}/actions/secrets/{name}"],
+    getOrgPublicKey: ["GET /orgs/{org}/actions/secrets/public-key"],
+    getOrgSecret: ["GET /orgs/{org}/actions/secrets/{secret_name}"],
+    getPublicKey: ["GET /repos/{owner}/{repo}/actions/secrets/public-key", {}, {
+      renamed: ["actions", "getRepoPublicKey"]
+    }],
+    getRepoPublicKey: ["GET /repos/{owner}/{repo}/actions/secrets/public-key"],
+    getRepoSecret: ["GET /repos/{owner}/{repo}/actions/secrets/{secret_name}", {}, {
+      renamedParameters: {
+        name: "secret_name"
+      }
+    }],
+    getSecret: ["GET /repos/{owner}/{repo}/actions/secrets/{secret_name}", {}, {
+      renamed: ["actions", "getRepoSecret"],
+      renamedParameters: {
+        name: "secret_name"
+      }
+    }],
     getSelfHostedRunner: ["GET /repos/{owner}/{repo}/actions/runners/{runner_id}", {}, {
       renamed: ["actions", "getSelfHostedRunnerForRepo"]
     }],
@@ -10036,16 +10131,23 @@ const Endpoints = {
     getWorkflow: ["GET /repos/{owner}/{repo}/actions/workflows/{workflow_id}"],
     getWorkflowJob: ["GET /repos/{owner}/{repo}/actions/jobs/{job_id}"],
     getWorkflowRun: ["GET /repos/{owner}/{repo}/actions/runs/{run_id}"],
+    getWorkflowRunUsage: ["GET /repos/{owner}/{repo}/actions/runs/{run_id}/timing"],
+    getWorkflowUsage: ["GET /repos/{owner}/{repo}/actions/workflows/{workflow_id}/timing"],
     listArtifactsForRepo: ["GET /repos/{owner}/{repo}/actions/artifacts"],
     listDownloadsForSelfHostedRunnerApplication: ["GET /repos/{owner}/{repo}/actions/runners/downloads", {}, {
       renamed: ["actions", "listRunnerApplicationsForRepo"]
     }],
     listJobsForWorkflowRun: ["GET /repos/{owner}/{repo}/actions/runs/{run_id}/jobs"],
+    listOrgSecrets: ["GET /orgs/{org}/actions/secrets"],
+    listRepoSecrets: ["GET /repos/{owner}/{repo}/actions/secrets"],
     listRepoWorkflowRuns: ["GET /repos/{owner}/{repo}/actions/runs"],
     listRepoWorkflows: ["GET /repos/{owner}/{repo}/actions/workflows"],
     listRunnerApplicationsForOrg: ["GET /orgs/{org}/actions/runners/downloads"],
     listRunnerApplicationsForRepo: ["GET /repos/{owner}/{repo}/actions/runners/downloads"],
-    listSecretsForRepo: ["GET /repos/{owner}/{repo}/actions/secrets"],
+    listSecretsForRepo: ["GET /repos/{owner}/{repo}/actions/secrets", {}, {
+      renamed: ["actions", "listRepoSecrets"]
+    }],
+    listSelectedReposForOrgSecret: ["GET /orgs/{org}/actions/secrets/{secret_name}/repositories"],
     listSelfHostedRunnersForOrg: ["GET /orgs/{org}/actions/runners"],
     listSelfHostedRunnersForRepo: ["GET /repos/{owner}/{repo}/actions/runners"],
     listWorkflowJobLogs: ["GET /repos/{owner}/{repo}/actions/jobs/{job_id}/logs", {}, {
@@ -10057,9 +10159,11 @@ const Endpoints = {
     }],
     listWorkflowRuns: ["GET /repos/{owner}/{repo}/actions/workflows/{workflow_id}/runs"],
     reRunWorkflow: ["POST /repos/{owner}/{repo}/actions/runs/{run_id}/rerun"],
+    removeSelectedRepoFromOrgSecret: ["DELETE /orgs/{org}/actions/secrets/{secret_name}/repositories/{repository_id}"],
     removeSelfHostedRunner: ["DELETE /repos/{owner}/{repo}/actions/runners/{runner_id}", {}, {
       renamed: ["actions", "deleteSelfHostedRunnerFromRepo"]
-    }]
+    }],
+    setSelectedReposForOrgSecret: ["PUT /orgs/{org}/actions/secrets/{secret_name}/repositories"]
   },
   activity: {
     checkRepoIsStarredByAuthenticatedUser: ["GET /user/starred/{owner}/{repo}"],
@@ -11197,7 +11301,7 @@ const Endpoints = {
   }
 };
 
-const VERSION = "3.11.0";
+const VERSION = "3.12.2";
 
 function endpointsToMethods(octokit, endpointsMap) {
   const newMethods = {};
@@ -11253,26 +11357,30 @@ function decorate(octokit, scope, methodName, defaults, decorations) {
 
     if (decorations.deprecated) {
       octokit.log.warn(decorations.deprecated);
-    } // There currently are no renamed parameters
-    // if (decorations.renamedParameters) {
-    //   // @ts-ignore https://github.com/microsoft/TypeScript/issues/25488
-    //   const options = requestWithDefaults.endpoint.merge(...args);
-    //   for (const [name, alias] of Object.entries(
-    //     decorations.renamedParameters
-    //   )) {
-    //     if (name in options) {
-    //       octokit.log.warn(
-    //         `"${name}" parameter is deprecated for "octokit.${scope}.${methodName}()". Use "${alias}" instead`
-    //       );
-    //       if (!(alias in options)) {
-    //         options[alias] = options[name];
-    //       }
-    //       delete options[name];
-    //     }
-    //   }
-    //   return requestWithDefaults(options);
-    // }
-    // @ts-ignore https://github.com/microsoft/TypeScript/issues/25488
+    }
+
+    if (decorations.renamedParameters) {
+      // @ts-ignore https://github.com/microsoft/TypeScript/issues/25488
+      const options = requestWithDefaults.endpoint.merge(...args);
+
+      for (const [name, alias] of Object.entries(decorations.renamedParameters)) {
+        // There is currently no deprecated parameter that is optional,
+        // so we never hit the else branch below at this point.
+
+        /* istanbul ignore else */
+        if (name in options) {
+          octokit.log.warn(`"${name}" parameter is deprecated for "octokit.${scope}.${methodName}()". Use "${alias}" instead`);
+
+          if (!(alias in options)) {
+            options[alias] = options[name];
+          }
+
+          delete options[name];
+        }
+      }
+
+      return requestWithDefaults(options);
+    } // @ts-ignore https://github.com/microsoft/TypeScript/issues/25488
 
 
     return requestWithDefaults(...args);
@@ -11472,7 +11580,7 @@ var pluginRequestLog = __webpack_require__(916);
 var pluginPaginateRest = __webpack_require__(299);
 var pluginRestEndpointMethods = __webpack_require__(842);
 
-const VERSION = "17.9.0";
+const VERSION = "17.9.2";
 
 const Octokit = core.Octokit.plugin(pluginRequestLog.requestLog, pluginRestEndpointMethods.restEndpointMethods, pluginPaginateRest.paginateRest).defaults({
   userAgent: `octokit-rest.js/${VERSION}`
@@ -11495,7 +11603,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 var request = __webpack_require__(753);
 var universalUserAgent = __webpack_require__(796);
 
-const VERSION = "4.4.0";
+const VERSION = "4.5.0";
 
 class GraphqlError extends Error {
   constructor(request, response) {

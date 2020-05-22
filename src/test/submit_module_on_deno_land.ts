@@ -8,8 +8,9 @@ import * as st from "scripting-tools";
 
     const repo = "psychic_carnival";
 
+    process.env["DENO_WEBSITE_REPO_OWNER"]= "cahuzacf";
+
     const out= await action("submit_module_on_deno_land", {
-        "commit_author_email": "denoify_ci@github.com",
         "owner": "garronej",
         repo,
     },
