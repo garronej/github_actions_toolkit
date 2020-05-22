@@ -18,14 +18,14 @@ import { getPullRequestAsyncIterableFactory } from "./tools/octokit-addons/getPu
 export const { getActionParams } = getActionParamsFactory({
     "inputNameSubset": [
         "owner",
-        "repo",
-        "commit_author_email"
+        "repo"
     ] as const
 });
 
 const deno_website_repo = "deno_website2";
-const denoland= "cahuzacf";
-//const denoland= "denoland";
+
+//NOTE: Enable to test without submitting PR on the real repo.
+const getDenoWebsiteRepoOwner= ()=> process.env["DENO_WEBSITE_REPO_OWNER"] ?? "denoland";
 
 export type Params = ReturnType<typeof getActionParams>;
 
@@ -43,7 +43,7 @@ export async function action(
     core: CoreLike
 ): Promise<Parameters<typeof setOutput>[0]> {
 
-    const { owner, repo, commit_author_email } = params;
+    const { owner, repo } = params;
 
     const { is_available_on_deno_land } = await is_well_formed_and_available_module_name.action(
         "is_well_formed_and_available_module_name",
@@ -56,7 +56,7 @@ export async function action(
         const databaseJsonParsed = await fetch(
             urlJoin(
                 "https://raw.github.com",
-                denoland,
+                getDenoWebsiteRepoOwner(),
                 deno_website_repo,
                 "master",
                 "src",
@@ -113,7 +113,7 @@ export async function action(
     }
 
 
-    await st.exec(`hub clone ${denoland}/${deno_website_repo}`);
+    await st.exec(`hub clone ${getDenoWebsiteRepoOwner()}/${deno_website_repo}`);
 
     const repoPath = path.join(process.cwd(), deno_website_repo);
 
@@ -250,7 +250,7 @@ async function checkDenoLandPullRequests(params: {
 
     const { octokit, core } = params;
 
-    core.debug(`Checking ${denoland}/${deno_website_repo} pull requests`);
+    core.debug(`Checking ${getDenoWebsiteRepoOwner()}/${deno_website_repo} pull requests`);
 
     const { getPullRequestAsyncIterable } = getPullRequestAsyncIterableFactory({ octokit });
 
@@ -258,7 +258,7 @@ async function checkDenoLandPullRequests(params: {
         const pullRequest
         of
         getPullRequestAsyncIterable({
-            "owner": denoland,
+            "owner": getDenoWebsiteRepoOwner(),
             "repo": deno_website_repo,
             "state": "all",
         })
@@ -269,7 +269,7 @@ async function checkDenoLandPullRequests(params: {
         }
 
         const database_json_changes = await octokit.pulls.listFiles({
-            "owner": denoland,
+            "owner": getDenoWebsiteRepoOwner(),
             "repo": deno_website_repo,
             "pull_number": pullRequest.number,
             "pages": 0
