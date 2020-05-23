@@ -71,7 +71,7 @@ export async function action(
                         packageLockJsonRaw
                             .replace(/\t/g, "    ")
                             .match(/^(\s*)\"version\"/m)![1].length
-                    ) + "\n",
+                    ) + packageLockJsonRaw.match(/}([\r\n]*)$/)![1],
                     "utf8"
                 )
             );
