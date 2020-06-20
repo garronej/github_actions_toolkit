@@ -8658,7 +8658,8 @@ const get_github_default_branch_name_1 = __webpack_require__(734);
 exports.getActionParams = inputHelper_1.getActionParamsFactory({
     "inputNameSubset": [
         "owner",
-        "repo"
+        "repo",
+        "default_version"
     ]
 }).getActionParams;
 const deno_website_repo = "deno_website2";
@@ -8667,7 +8668,7 @@ const getDenoWebsiteRepoOwner = () => { var _a; return (_a = process.env["DENO_W
 exports.setOutput = outputHelper_1.setOutputFactory().setOutput;
 function action(_actionName, params, core) {
     return __awaiter(this, void 0, void 0, function* () {
-        const { owner, repo } = params;
+        const { owner, repo, default_version } = params;
         const { is_available_on_deno_land } = yield is_well_formed_and_available_module_name.action("is_well_formed_and_available_module_name", { "module_name": repo }, core);
         if (!is_available_on_deno_land) {
             const owner = getDenoWebsiteRepoOwner();
@@ -8739,7 +8740,8 @@ function action(_actionName, params, core) {
                             "type": "github",
                             owner,
                             repo,
-                            desc
+                            desc,
+                            default_version
                         });
                 return out;
             })(), null, 2) + "\n", "utf8"));
@@ -8892,7 +8894,8 @@ exports.inputNames = [
     "compare_to_version",
     "input_string",
     "search_value",
-    "replace_value"
+    "replace_value",
+    "default_version"
 ];
 exports.availableActions = [
     "get_package_json_version",
@@ -8949,6 +8952,7 @@ function getInputDescription(inputName) {
         case "input_string": return `For string_replace, the string to replace`;
         case "search_value": return `For string_replace, Example '-' ( Will be used as arg for RegExp constructor )`;
         case "replace_value": return `For string_replace, Example '_'`;
+        case "default_version": return "For submit_module_on_deno_land, example 'deno_latest'";
     }
 }
 exports.getInputDescription = getInputDescription;

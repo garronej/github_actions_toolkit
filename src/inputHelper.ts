@@ -16,7 +16,8 @@ export const inputNames = [
     "compare_to_version",
     "input_string",
     "search_value",
-    "replace_value"
+    "replace_value",
+    "default_version"
 ] as const;
 
 export const availableActions = [
@@ -76,6 +77,7 @@ export function getInputDescription(inputName: typeof inputNames[number]): strin
         case "input_string": return `For string_replace, the string to replace`;
         case "search_value": return `For string_replace, Example '-' ( Will be used as arg for RegExp constructor )`;
         case "replace_value": return `For string_replace, Example '_'`;
+        case "default_version": return "For submit_module_on_deno_land, example 'deno_latest'"
     }
 }
 

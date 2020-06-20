@@ -19,7 +19,8 @@ import { getGithubDefaultBranchName } from "get-github-default-branch-name";
 export const { getActionParams } = getActionParamsFactory({
     "inputNameSubset": [
         "owner",
-        "repo"
+        "repo",
+        "default_version"
     ] as const
 });
 
@@ -44,7 +45,7 @@ export async function action(
     core: CoreLike
 ): Promise<Parameters<typeof setOutput>[0]> {
 
-    const { owner, repo } = params;
+    const { owner, repo, default_version } = params;
 
     const { is_available_on_deno_land } = await is_well_formed_and_available_module_name.action(
         "is_well_formed_and_available_module_name",
@@ -194,7 +195,8 @@ export async function action(
                                             "type": "github",
                                             owner,
                                             repo,
-                                            desc
+                                            desc,
+                                            default_version
                                         }
                             )
                             ;

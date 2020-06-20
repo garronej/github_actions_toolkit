@@ -47,6 +47,9 @@ inputs:
   replace_value:
     required: false
     description: 'For string_replace, Example ''_'''
+  default_version:
+    required: false
+    description: 'For submit_module_on_deno_land, example ''deno_latest'''
 outputs:
   version:
     description: 'Output of get_package_json_version'

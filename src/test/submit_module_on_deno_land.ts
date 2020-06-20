@@ -13,6 +13,7 @@ import * as st from "scripting-tools";
     const out= await action("submit_module_on_deno_land", {
         "owner": "garronej",
         repo,
+        "default_version": "master"
     },
         { 
             "debug": console.log,
