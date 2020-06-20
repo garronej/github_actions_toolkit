@@ -19,10 +19,10 @@ inputs:
     description: 'Example ''{"p":"foo"}'' see: https://developer.github.com/v3/repos/#create-a-repository-dispatch-event'
   branch:
     required: false
-    description: 'Example: master ( can also be a sha )'
+    description: 'Example: default ( can also be a sha )'
   branch_behind:
     required: false
-    description: 'Name of a branch, example: ''master'' ( can also be an sha )'
+    description: 'Name of a branch, example: ''default'' ( can also be an sha )'
   branch_ahead:
     required: false
     description: 'Name of a branch, example: ''dev'' ( can also be an sha )'

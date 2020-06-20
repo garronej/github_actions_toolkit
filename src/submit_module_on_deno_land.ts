@@ -13,6 +13,7 @@ const urlJoin: typeof import("path").join = require("url-join");
 import { assert } from "evt/dist/tools/typeSafety";
 import * as is_well_formed_and_available_module_name from "./is_well_formed_and_available_module_name";
 import { getPullRequestAsyncIterableFactory } from "./tools/octokit-addons/getPullRequestAsyncIterable";
+import { getGithubDefaultBranchName } from "get-github-default-branch-name";
 
 
 export const { getActionParams } = getActionParamsFactory({
@@ -53,12 +54,17 @@ export async function action(
 
     if (!is_available_on_deno_land) {
 
+        const owner = getDenoWebsiteRepoOwner();
+
         const databaseJsonParsed = await fetch(
             urlJoin(
                 "https://raw.github.com",
-                getDenoWebsiteRepoOwner(),
+                owner,
                 deno_website_repo,
-                "master",
+                await getGithubDefaultBranchName({
+                    owner,
+                    "repo": deno_website_repo
+                }),
                 "src",
                 "database.json"
             )
@@ -106,9 +112,14 @@ export async function action(
 
     }
 
-    if( !st.apt_get_install_if_missing.doesHaveProg("hub") ){
+    if (!st.apt_get_install_if_missing.doesHaveProg("hub")) {
 
-        await st.exec("curl -fsSL https://github.com/github/hub/raw/master/script/get | bash -s 2.14.1");
+        const branch = await getGithubDefaultBranchName({
+            "owner": "github",
+            "repo": "hub"
+        });
+
+        await st.exec(`curl -fsSL https://github.com/github/hub/raw/${branch}/script/get | bash -s 2.14.1`);
 
     }
 
@@ -147,7 +158,7 @@ export async function action(
                 "https://raw.github.com",
                 owner,
                 repo,
-                "master",
+                await getGithubDefaultBranchName({ owner, repo }),
                 "package.json"
             )
         )
@@ -275,7 +286,7 @@ async function checkDenoLandPullRequests(params: {
             "pages": 0
         }).then(
             ({ data }) => data.find(
-                ({ filename }) => ( 
+                ({ filename }) => (
                     filename === "src/database.json" ||
                     filename === "database.json"
                 )
@@ -291,7 +302,7 @@ async function checkDenoLandPullRequests(params: {
         const databaseJsonParsed = await fetch(database_json_changes.raw_url)
             .then(res => res.text())
             .then(text => JSON.parse(text))
-            .catch(() =>  undefined );
+            .catch(() => undefined);
         ;
 
         if (typeof databaseJsonParsed !== "object") {

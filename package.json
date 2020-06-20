@@ -26,7 +26,8 @@
     "node-fetch": "^2.6.0",
     "scripting-tools": "^0.19.12",
     "url-join": "^4.0.1",
-    "validate-npm-package-name": "^3.0.0"
+    "validate-npm-package-name": "^3.0.0",
+    "get-github-default-branch-name": "^0.0.4"
   },
   "devDependencies": {
     "@types/glob": "^7.1.1",
