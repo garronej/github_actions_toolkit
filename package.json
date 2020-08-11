@@ -6,9 +6,8 @@
   "main": "lib/main.js",
   "scripts": {
     "generate-action-yml": "node lib/bin/generateActionYml.js",
-    "tsc": "npx tsc",
     "pack": "ncc build",
-    "build": "npm run tsc && npm run generate-action-yml && npm run pack",
+    "build": "tsc && npm run generate-action-yml && npm run pack",
     "clean": "rm -rf dist lib node_modules package-lock.json"
   },
   "repository": {

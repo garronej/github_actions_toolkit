@@ -16,8 +16,7 @@ export const inputNames = [
     "compare_to_version",
     "input_string",
     "search_value",
-    "replace_value",
-    "default_version"
+    "replace_value"
 ] as const;
 
 export const availableActions = [
@@ -25,7 +24,7 @@ export const availableActions = [
     "dispatch_event",
     "update_changelog",
     "sync_package_and_package_lock_version",
-    "submit_module_on_deno_land",
+    "setup_repo_webhook_for_deno_land_publishing",
     "is_well_formed_and_available_module_name",
     "string_replace"
 ] as const;
@@ -77,7 +76,6 @@ export function getInputDescription(inputName: typeof inputNames[number]): strin
         case "input_string": return `For string_replace, the string to replace`;
         case "search_value": return `For string_replace, Example '-' ( Will be used as arg for RegExp constructor )`;
         case "replace_value": return `For string_replace, Example '_'`;
-        case "default_version": return "For submit_module_on_deno_land, example 'deno_latest'"
     }
 }
 

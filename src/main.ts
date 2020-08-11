@@ -2,7 +2,7 @@ import * as core from '@actions/core'
 import * as get_package_json_version from "./get_package_json_version";
 import * as dispatch_event from "./dispatch_event";
 import * as sync_package_and_package_lock_version from "./sync_package_and_package_lock_version";
-import * as submit_module_on_deno_land from "./submit_module_on_deno_land";
+import * as setup_repo_webhook_for_deno_land_publishing from "./setup_repo_webhook_for_deno_land_publishing";
 import * as is_well_formed_and_available_module_name from "./is_well_formed_and_available_module_name";
 import * as string_replace from "./string_replace";
 import { getActionName } from "./inputHelper";
@@ -43,13 +43,11 @@ async function run(): Promise<void> {
                 core
             );
             return;
-        case "submit_module_on_deno_land":
-            submit_module_on_deno_land.setOutput(
-                await submit_module_on_deno_land.action(
-                    action_name,
-                    submit_module_on_deno_land.getActionParams(),
-                    core
-                )
+        case "setup_repo_webhook_for_deno_land_publishing":
+            await setup_repo_webhook_for_deno_land_publishing.action(
+                action_name,
+                setup_repo_webhook_for_deno_land_publishing.getActionParams(),
+                core
             );
             return;
         case "is_well_formed_and_available_module_name":
@@ -61,7 +59,7 @@ async function run(): Promise<void> {
                 )
             );
             return;
-        case "string_replace": 
+        case "string_replace":
             string_replace.setOutput(
                 await string_replace.action(
                     action_name,
