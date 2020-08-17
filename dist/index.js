@@ -786,7 +786,7 @@ function run() {
                 yield sync_package_and_package_lock_version.action(action_name, sync_package_and_package_lock_version.getActionParams(), core);
                 return;
             case "setup_repo_webhook_for_deno_land_publishing":
-                yield setup_repo_webhook_for_deno_land_publishing.action(action_name, setup_repo_webhook_for_deno_land_publishing.getActionParams(), core);
+                setup_repo_webhook_for_deno_land_publishing.setOutput(yield setup_repo_webhook_for_deno_land_publishing.action(action_name, setup_repo_webhook_for_deno_land_publishing.getActionParams(), core));
                 return;
             case "is_well_formed_and_available_module_name":
                 is_well_formed_and_available_module_name.setOutput(yield is_well_formed_and_available_module_name.action(action_name, is_well_formed_and_available_module_name.getActionParams(), core));
@@ -7825,25 +7825,6 @@ function addHook (state, kind, name, hook) {
 
 "use strict";
 
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -7854,34 +7835,38 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.action = exports.getActionParams = void 0;
+exports.action = exports.setOutput = exports.getActionParams = void 0;
+const outputHelper_1 = __webpack_require__(762);
 const inputHelper_1 = __webpack_require__(649);
 const createOctokit_1 = __webpack_require__(906);
-const is_well_formed_and_available_module_name = __importStar(__webpack_require__(794));
 exports.getActionParams = inputHelper_1.getActionParamsFactory({
     "inputNameSubset": [
         "owner",
-        "repo"
+        "repo",
+        "should_webhook_be_enabled"
     ]
 }).getActionParams;
+exports.setOutput = outputHelper_1.setOutputFactory().setOutput;
 function action(_actionName, params, core) {
     return __awaiter(this, void 0, void 0, function* () {
-        const { owner, repo } = params;
-        const { is_available_on_deno_land } = yield is_well_formed_and_available_module_name.action("is_well_formed_and_available_module_name", { "module_name": repo }, core);
-        if (!is_available_on_deno_land) {
-            throw new Error(`${repo} module name is no longer available`);
-        }
+        const { owner, repo, should_webhook_be_enabled } = params;
         const octokit = createOctokit_1.createOctokit();
-        yield octokit.repos.createWebhook({
-            owner,
-            repo,
-            "active": true,
-            "events": ["create"],
-            "config": {
-                "url": `https://api.deno.land/webhook/gh/${repo}?subdir=deno_dist%252F`,
-                "content_type": "json"
-            }
-        });
+        try {
+            yield octokit.repos.createWebhook({
+                owner,
+                repo,
+                "active": should_webhook_be_enabled === "true",
+                "events": ["create"],
+                "config": {
+                    "url": `https://api.deno.land/webhook/gh/${repo}?subdir=deno_dist%252F`,
+                    "content_type": "json"
+                }
+            });
+        }
+        catch (_a) {
+            return { "was_hook_created": "false" };
+        }
+        return { "was_hook_created": "true" };
     });
 }
 exports.action = action;
@@ -8349,7 +8334,8 @@ exports.inputNames = [
     "compare_to_version",
     "input_string",
     "search_value",
-    "replace_value"
+    "replace_value",
+    "should_webhook_be_enabled"
 ];
 exports.availableActions = [
     "get_package_json_version",
@@ -8406,6 +8392,7 @@ function getInputDescription(inputName) {
         case "input_string": return `For string_replace, the string to replace`;
         case "search_value": return `For string_replace, Example '-' ( Will be used as arg for RegExp constructor )`;
         case "replace_value": return `For string_replace, Example '_'`;
+        case "should_webhook_be_enabled": return `true|false, For debugging purpose, with setup_repo_webhook_for_deno_land_publishing`;
     }
 }
 exports.getInputDescription = getInputDescription;
@@ -9171,7 +9158,8 @@ exports.outputNames = [
     "is_available_on_deno_land",
     "was_already_published",
     "compare_result",
-    "replace_result"
+    "replace_result",
+    "was_hook_created"
 ];
 function getOutputDescription(inputName) {
     switch (inputName) {
@@ -9183,6 +9171,7 @@ function getOutputDescription(inputName) {
         case "was_already_published": return "true|false";
         case "compare_result": return "1|0|-1";
         case "replace_result": return "Output of string_replace";
+        case "was_hook_created": return "true|false";
     }
 }
 exports.getOutputDescription = getOutputDescription;

@@ -44,10 +44,12 @@ async function run(): Promise<void> {
             );
             return;
         case "setup_repo_webhook_for_deno_land_publishing":
-            await setup_repo_webhook_for_deno_land_publishing.action(
-                action_name,
-                setup_repo_webhook_for_deno_land_publishing.getActionParams(),
-                core
+            setup_repo_webhook_for_deno_land_publishing.setOutput(
+                await setup_repo_webhook_for_deno_land_publishing.action(
+                    action_name,
+                    setup_repo_webhook_for_deno_land_publishing.getActionParams(),
+                    core
+                )
             );
             return;
         case "is_well_formed_and_available_module_name":

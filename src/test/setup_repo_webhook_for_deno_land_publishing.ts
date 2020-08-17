@@ -8,16 +8,19 @@ import * as st from "scripting-tools";
 
     const repo = "reimagined_octo_winner_kay";
 
-    await action(
+    const resp = await action(
         "setup_repo_webhook_for_deno_land_publishing",
         {
             "owner": "garronej",
-            "repo": "reimagined_octo_winner_kay"
+            "repo": "reimagined_octo_winner_kay",
+            "should_webhook_be_enabled": "false"
         },
         {
             "debug": console.log,
             "warning": console.warn
         }
     );
+
+    console.log(resp);
 
 })();

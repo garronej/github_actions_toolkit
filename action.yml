@@ -47,6 +47,9 @@ inputs:
   replace_value:
     required: false
     description: 'For string_replace, Example ''_'''
+  should_webhook_be_enabled:
+    required: false
+    description: 'true|false, For debugging purpose, with setup_repo_webhook_for_deno_land_publishing'
 outputs:
   version:
     description: 'Output of get_package_json_version'
@@ -64,6 +67,8 @@ outputs:
     description: '1|0|-1'
   replace_result:
     description: 'Output of string_replace'
+  was_hook_created:
+    description: 'true|false'
 runs:
   using: 'node12'
   main: 'dist/index.js'
