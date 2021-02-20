@@ -65,6 +65,7 @@ export async function action(
                     JSON.stringify(
                         (() => {
                             packageLockJsonParsed.version = version;
+                            packageLockJsonParsed.packages[""].version = version;
                             return packageLockJsonParsed;
                         })(),
                         null,
