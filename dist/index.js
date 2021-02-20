@@ -9657,6 +9657,7 @@ function action(_actionName, params, core) {
                 }
                 fs.writeFileSync("package-lock.json", Buffer.from(JSON.stringify((() => {
                     packageLockJsonParsed.version = version;
+                    packageLockJsonParsed.packages[""].version = version;
                     return packageLockJsonParsed;
                 })(), null, packageLockJsonRaw
                     .replace(/\t/g, "    ")
