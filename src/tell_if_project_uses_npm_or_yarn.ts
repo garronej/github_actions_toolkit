@@ -2,7 +2,6 @@
 import fetch from "node-fetch";
 const urlJoin: typeof import("path").join = require("url-join");
 import { setOutputFactory } from "./outputHelper";
-import { NpmModuleVersion } from "./tools/NpmModuleVersion";
 
 import { getActionParamsFactory } from "./inputHelper";
 

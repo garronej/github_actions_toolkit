@@ -4,11 +4,12 @@ import * as dispatch_event from "./dispatch_event";
 import * as sync_package_and_package_lock_version from "./sync_package_and_package_lock_version";
 import * as setup_repo_webhook_for_deno_land_publishing from "./setup_repo_webhook_for_deno_land_publishing";
 import * as is_well_formed_and_available_module_name from "./is_well_formed_and_available_module_name";
+import * as tell_if_project_uses_npm_or_yarn  from "./tell_if_project_uses_npm_or_yarn";
 import * as string_replace from "./string_replace";
 import { getActionName } from "./inputHelper";
 import * as update_changelog from "./update_changelog";
 
-async function run(): Promise<void> {
+async function run(): Promise<null> {
 
     const action_name = getActionName();
 
@@ -21,28 +22,28 @@ async function run(): Promise<void> {
                     core
                 )
             );
-            return;
+            return null;
         case "dispatch_event":
             await dispatch_event.action(
                 action_name,
                 dispatch_event.getActionParams(),
                 core
             );
-            return;
+            return null;
         case "update_changelog":
             await update_changelog.action(
                 action_name,
                 update_changelog.getActionParams(),
                 core
             );
-            return;
+            return null;
         case "sync_package_and_package_lock_version":
             await sync_package_and_package_lock_version.action(
                 action_name,
                 sync_package_and_package_lock_version.getActionParams(),
                 core
             );
-            return;
+            return null;
         case "setup_repo_webhook_for_deno_land_publishing":
             setup_repo_webhook_for_deno_land_publishing.setOutput(
                 await setup_repo_webhook_for_deno_land_publishing.action(
@@ -51,7 +52,7 @@ async function run(): Promise<void> {
                     core
                 )
             );
-            return;
+            return null;
         case "is_well_formed_and_available_module_name":
             is_well_formed_and_available_module_name.setOutput(
                 await is_well_formed_and_available_module_name.action(
@@ -60,7 +61,7 @@ async function run(): Promise<void> {
                     core
                 )
             );
-            return;
+            return null;
         case "string_replace":
             string_replace.setOutput(
                 await string_replace.action(
@@ -69,10 +70,22 @@ async function run(): Promise<void> {
                     core
                 )
             );
-            return;
+            return null;
+        case "tell_if_project_uses_npm_or_yarn":
+            tell_if_project_uses_npm_or_yarn.setOutput(
+                await tell_if_project_uses_npm_or_yarn.action(
+                    action_name,
+                    tell_if_project_uses_npm_or_yarn.getActionParams(),
+                    core
+                )
+            );
+            return null;
+
     }
 
-    throw new Error(`${action_name} Not supported by this toolkit`);
+    if( 1 === 0 +1 ){
+        throw new Error(`${action_name} Not supported by this toolkit`);
+    }
 
 }
 

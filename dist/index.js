@@ -766,6 +766,7 @@ const dispatch_event = __importStar(__webpack_require__(863));
 const sync_package_and_package_lock_version = __importStar(__webpack_require__(830));
 const setup_repo_webhook_for_deno_land_publishing = __importStar(__webpack_require__(518));
 const is_well_formed_and_available_module_name = __importStar(__webpack_require__(794));
+const tell_if_project_uses_npm_or_yarn = __importStar(__webpack_require__(201));
 const string_replace = __importStar(__webpack_require__(599));
 const inputHelper_1 = __webpack_require__(649);
 const update_changelog = __importStar(__webpack_require__(702));
@@ -775,27 +776,32 @@ function run() {
         switch (action_name) {
             case "get_package_json_version":
                 get_package_json_version.setOutput(yield get_package_json_version.action(action_name, get_package_json_version.getActionParams(), core));
-                return;
+                return null;
             case "dispatch_event":
                 yield dispatch_event.action(action_name, dispatch_event.getActionParams(), core);
-                return;
+                return null;
             case "update_changelog":
                 yield update_changelog.action(action_name, update_changelog.getActionParams(), core);
-                return;
+                return null;
             case "sync_package_and_package_lock_version":
                 yield sync_package_and_package_lock_version.action(action_name, sync_package_and_package_lock_version.getActionParams(), core);
-                return;
+                return null;
             case "setup_repo_webhook_for_deno_land_publishing":
                 setup_repo_webhook_for_deno_land_publishing.setOutput(yield setup_repo_webhook_for_deno_land_publishing.action(action_name, setup_repo_webhook_for_deno_land_publishing.getActionParams(), core));
-                return;
+                return null;
             case "is_well_formed_and_available_module_name":
                 is_well_formed_and_available_module_name.setOutput(yield is_well_formed_and_available_module_name.action(action_name, is_well_formed_and_available_module_name.getActionParams(), core));
-                return;
+                return null;
             case "string_replace":
                 string_replace.setOutput(yield string_replace.action(action_name, string_replace.getActionParams(), core));
-                return;
+                return null;
+            case "tell_if_project_uses_npm_or_yarn":
+                tell_if_project_uses_npm_or_yarn.setOutput(yield tell_if_project_uses_npm_or_yarn.action(action_name, tell_if_project_uses_npm_or_yarn.getActionParams(), core));
+                return null;
         }
-        throw new Error(`${action_name} Not supported by this toolkit`);
+        if (true) {
+            throw new Error(`${action_name} Not supported by this toolkit`);
+        }
     });
 }
 (() => __awaiter(void 0, void 0, void 0, function* () {
@@ -806,6 +812,51 @@ function run() {
         core.setFailed(error.message);
     }
 }))();
+
+
+/***/ }),
+
+/***/ 201:
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.action = exports.setOutput = exports.getActionParams = void 0;
+const node_fetch_1 = __importDefault(__webpack_require__(454));
+const urlJoin = __webpack_require__(683);
+const outputHelper_1 = __webpack_require__(762);
+const inputHelper_1 = __webpack_require__(649);
+exports.getActionParams = inputHelper_1.getActionParamsFactory({
+    "inputNameSubset": [
+        "owner",
+        "repo",
+        "branch"
+    ]
+}).getActionParams;
+exports.setOutput = outputHelper_1.setOutputFactory().setOutput;
+function action(_actionName, params, core) {
+    return __awaiter(this, void 0, void 0, function* () {
+        core.debug(JSON.stringify(params));
+        const { owner, repo, branch } = params;
+        const npm_or_yarn = yield node_fetch_1.default(urlJoin("https://raw.github.com", owner, repo, branch, ".yarn.lock")).then(res => res.status === 404 ? "npm" : "yarn");
+        core.debug(`Version on ${owner}/${repo}#${branch} is using ${npm_or_yarn}`);
+        return { npm_or_yarn };
+    });
+}
+exports.action = action;
 
 
 /***/ }),
