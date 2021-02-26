@@ -11,7 +11,8 @@ export const outputNames = [
     "was_already_published",
     "compare_result",
     "replace_result",
-    "was_hook_created"
+    "was_hook_created",
+    "npm_or_yarn"
 ] as const;
 
 
@@ -26,6 +27,7 @@ export function getOutputDescription(inputName: typeof outputNames[number]): str
         case "compare_result": return "1|0|-1";
         case "replace_result": return "Output of string_replace";
         case "was_hook_created": return "true|false";
+        case "npm_or_yarn": return "npm|yarn";
     }
 }
 

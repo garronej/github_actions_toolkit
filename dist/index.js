@@ -3239,7 +3239,7 @@ exports.NpmModuleVersion = void 0;
 var NpmModuleVersion;
 (function (NpmModuleVersion) {
     function parse(versionStr) {
-        const match = versionStr.match(/^([0-9]+)\.([0-9]+)\.([0-9]+)/);
+        const match = versionStr.match(/^([0-9]+)\.([0-9]+)\.([0-9]+)(?:-beta.([0-9]+))?/);
         if (!match) {
             throw new Error(`${versionStr} is not a valid NPM version`);
         }
@@ -8351,7 +8351,8 @@ exports.availableActions = [
     "sync_package_and_package_lock_version",
     "setup_repo_webhook_for_deno_land_publishing",
     "is_well_formed_and_available_module_name",
-    "string_replace"
+    "string_replace",
+    "tell_if_project_uses_npm_or_yarn"
 ];
 function getInputDescription(inputName) {
     switch (inputName) {
@@ -9166,7 +9167,8 @@ exports.outputNames = [
     "was_already_published",
     "compare_result",
     "replace_result",
-    "was_hook_created"
+    "was_hook_created",
+    "npm_or_yarn"
 ];
 function getOutputDescription(inputName) {
     switch (inputName) {
@@ -9179,6 +9181,7 @@ function getOutputDescription(inputName) {
         case "compare_result": return "1|0|-1";
         case "replace_result": return "Output of string_replace";
         case "was_hook_created": return "true|false";
+        case "npm_or_yarn": return "npm|yarn";
     }
 }
 exports.getOutputDescription = getOutputDescription;
