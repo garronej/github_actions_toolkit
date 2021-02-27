@@ -29,7 +29,9 @@ export async function action(
 
     core.debug(JSON.stringify(params));
 
-    const { owner, repo, branch } = params;
+    const { owner, repo } = params;
+
+    const branch = params.branch.split("/").reverse()[0];
 
     const npm_or_yarn = await fetch(
         urlJoin(

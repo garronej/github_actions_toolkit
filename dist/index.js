@@ -851,7 +851,9 @@ function action(_actionName, params, core) {
     return __awaiter(this, void 0, void 0, function* () {
         core.debug(JSON.stringify(params));
         const { owner, repo, branch } = params;
-        const npm_or_yarn = yield node_fetch_1.default(urlJoin("https://raw.github.com", owner, repo, branch, "yarn.lock")).then(res => res.status === 404 ? "npm" : "yarn");
+        const url = urlJoin("https://raw.github.com", owner, repo, branch.split("/").reverse()[0], "yarn.lock");
+        console.log(url);
+        const npm_or_yarn = yield node_fetch_1.default(url).then(res => res.status === 404 ? "npm" : "yarn");
         core.debug(`Version on ${owner}/${repo}#${branch} is using ${npm_or_yarn}`);
         return { npm_or_yarn };
     });
