@@ -37,7 +37,7 @@ export async function action(
             owner,
             repo,
             branch,
-            ".yarn.lock"
+            "yarn.lock"
         )
     ).then(res => res.status === 404 ? "npm" : "yarn")
 
