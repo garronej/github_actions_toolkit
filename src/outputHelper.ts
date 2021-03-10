@@ -12,7 +12,10 @@ export const outputNames = [
     "compare_result",
     "replace_result",
     "was_hook_created",
-    "npm_or_yarn"
+    "npm_or_yarn",
+    "from_version",
+    "to_version",
+    "is_upgraded_version"
 ] as const;
 
 
@@ -28,6 +31,9 @@ export function getOutputDescription(inputName: typeof outputNames[number]): str
         case "replace_result": return "Output of string_replace";
         case "was_hook_created": return "true|false";
         case "npm_or_yarn": return "npm|yarn";
+        case "from_version": return "Output of is_package_json_version_upgraded, string";
+        case "to_version": return "Output of is_package_json_version_upgraded, string";
+        case "is_upgraded_version": return "Output of is_package_json_version_upgraded, true|false";
     }
 }
 

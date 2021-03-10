@@ -28,7 +28,8 @@ export const availableActions = [
     "setup_repo_webhook_for_deno_land_publishing",
     "is_well_formed_and_available_module_name",
     "string_replace",
-    "tell_if_project_uses_npm_or_yarn"
+    "tell_if_project_uses_npm_or_yarn",
+    "is_package_json_version_upgraded"
 ] as const;
 
 
