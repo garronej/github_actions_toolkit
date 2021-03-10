@@ -88,7 +88,7 @@ export function getInputDefault(inputName: typeof inputNames[number]): string |Â
         case "owner": return "${{github.repository_owner}}";
         case "repo": return "${{github.event.repository.name}}";
         case "branch": return "${{ github.sha }}";
-        case "github_token": return "${{ secrets.GITHUB_TOKEN }}";
+        case "github_token": return "${{ github.token }}";
         case "commit_author_email": return "github_actions_toolkit@github.com";
         case "exclude_commit_from_author_names_json": return '["github_actions_toolkit"]';
     }
