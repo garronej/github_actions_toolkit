@@ -10,6 +10,7 @@ action(
         "repo": "test-repo",
         "event_type": "example-event",
         "client_payload_json": JSON.stringify({ "foo": "bar" }),
+        "github_token": ""
     },
     { "debug": console.log }
 );

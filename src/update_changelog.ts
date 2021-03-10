@@ -5,18 +5,18 @@ import { getCommitAheadFactory } from "./tools/octokit-addons/getCommitAhead";
 import * as get_package_json_version from "./get_package_json_version";
 import * as fs from "fs";
 import { NpmModuleVersion } from "./tools/NpmModuleVersion";
-import { assert } from "evt/dist/tools/typeSafety";
-import { createOctokit } from "./tools/createOctokit";
 import { gitCommit } from "./tools/gitCommit";
+import { getLatestSemVersionedTagFactory } from "./tools/octokit-addons/getLatestSemVersionedTag";
+import { createOctokit } from "./tools/createOctokit";
 
 export const { getActionParams } = getActionParamsFactory({
     "inputNameSubset": [
         "owner",
         "repo",
-        "branch_behind",
-        "branch_ahead",
+        "branch",
         "commit_author_email",
-        "exclude_commit_from_author_names_json"
+        "exclude_commit_from_author_names_json",
+        "github_token"
     ] as const
 });
 
@@ -36,9 +36,9 @@ export async function action(
     const {
         owner,
         repo,
-        branch_ahead,
-        branch_behind,
-        commit_author_email
+        branch,
+        commit_author_email,
+        github_token
     } = params;
 
     core.debug(`params: ${JSON.stringify(params)}`);
@@ -47,20 +47,33 @@ export async function action(
         JSON.parse(params.exclude_commit_from_author_names_json)
         ;
 
-    const octokit = createOctokit();
+
+    const octokit = createOctokit({ github_token });
 
     const { getCommitAhead } = getCommitAheadFactory({ octokit });
+
+    const { getLatestSemVersionedTag } = getLatestSemVersionedTagFactory({ octokit });
+
+    const { tag: branchBehind } = (await getLatestSemVersionedTag({ owner, repo })) ?? {};
+
+    if( branchBehind === undefined ){
+
+        core.warning(`It's the first release, not editing the CHANGELOG.md`);
+
+        return;
+
+    }
 
     const { commits } = await getCommitAhead({
         owner,
         repo,
-        "branchBehind": branch_behind,
-        "branchAhead": branch_ahead
+        branchBehind,
+        "branchAhead": branch
     }).catch(() => ({ "commits": undefined }));
 
     if( commits === undefined ){
 
-        core.warning(`${branch_behind} probably does not exist`);
+        core.warning(`${branchBehind} probably does not exist`);
 
         return;
 
@@ -70,7 +83,7 @@ export async function action(
         branchBehindVersion,
         branchAheadVersion
     ] = await Promise.all(
-        ([branch_behind, branch_ahead] as const)
+        ([branchBehind, branch] as const)
             .map(branch =>
                 get_package_json_version.action(
                     "get_package_json_version",
@@ -93,7 +106,7 @@ export async function action(
 
     if( bumpType === "SAME" ){
 
-        core.warning(`Version on ${branch_ahead} and ${branch_behind} are the same, not editing CHANGELOG.md`);
+        core.warning(`Version on ${branch} and ${branchBehind} are the same, not editing CHANGELOG.md`);
 
         return;
 
@@ -102,10 +115,11 @@ export async function action(
     await gitCommit({
         owner,
         repo,
+        github_token,
         "commitAuthorEmail": commit_author_email,
         "performChanges": async () => {
 
-            await st.exec(`git checkout ${branch_ahead}`);
+            await st.exec(`git checkout ${branch}`);
 
             const { changelogRaw } = updateChangelog({
                 "changelogRaw":

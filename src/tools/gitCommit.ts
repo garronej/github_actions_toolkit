@@ -5,12 +5,12 @@ export async function gitCommit(
         owner: string;
         repo: string;
         commitAuthorEmail: string;
-        performChanges: () => Promise<{ commit: false; } | { commit: true; addAll: boolean; message: string; }>
-
+        performChanges: () => Promise<{ commit: false; } | { commit: true; addAll: boolean; message: string; }>;
+        github_token: string;
     }
 ) {
 
-    const { owner, repo, commitAuthorEmail, performChanges } = params;
+    const { owner, repo, commitAuthorEmail, performChanges, github_token } = params;
 
     await st.exec(`git clone https://github.com/${owner}/${repo}`);
 
@@ -45,7 +45,7 @@ export async function gitCommit(
 
         await st.exec(`git commit -am "${changesResult.message}"`);
 
-        await st.exec(`git push "https://${owner}:${process.env["GITHUB_TOKEN"]}@github.com/${owner}/${repo}.git"`);
+        await st.exec(`git push "https://${owner}:${github_token}@github.com/${owner}/${repo}.git"`);
 
     }
 

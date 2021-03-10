@@ -8,9 +8,11 @@ inputs:
   owner:
     required: false
     description: 'Repository owner, example: ''garronej'',github.repository_owner'
+    default: '${{github.repository_owner}}'
   repo:
     required: false
     description: 'Repository name, example: ''evt'', github.event.repository.name'
+    default: '${{github.event.repository.name}}'
   event_type:
     required: false
     description: 'see: https://developer.github.com/v3/repos/#create-a-repository-dispatch-event'
@@ -20,18 +22,15 @@ inputs:
   branch:
     required: false
     description: 'Example: default ( can also be a sha )'
-  branch_behind:
-    required: false
-    description: 'Name of a branch, example: ''default'' ( can also be an sha )'
-  branch_ahead:
-    required: false
-    description: 'Name of a branch, example: ''dev'' ( can also be an sha )'
+    default: '${{ github.sha }}'
   commit_author_email:
     required: false
     description: 'Email id  of the bot that will author the commit for updating the CHANGELOG.md file, ex: denoify_ci@github.com'
+    default: 'github_actions_toolkit@github.com'
   exclude_commit_from_author_names_json:
     required: false
     description: 'For update_changelog, do not includes commit from user certain committer in the CHANGELOG.md, ex: ''["denoify_ci"]'''
+    default: '["github_actions_toolkit"]'
   module_name:
     required: false
     description: 'A candidate module name, Example: lodash'
@@ -50,6 +49,10 @@ inputs:
   should_webhook_be_enabled:
     required: false
     description: 'true|false, For debugging purpose, with setup_repo_webhook_for_deno_land_publishing'
+  github_token:
+    required: false
+    description: 'GitHub Personal access token'
+    default: '${{ secrets.GITHUB_TOKEN }}'
 outputs:
   version:
     description: 'Output of get_package_json_version'

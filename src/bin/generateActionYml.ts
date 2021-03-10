@@ -1,7 +1,7 @@
 
 import * as fs from "fs";
 import * as path from "path";
-import { inputNames, getInputDescription } from "../inputHelper";
+import { inputNames, getInputDescription, getInputDefault } from "../inputHelper";
 import { outputNames, getOutputDescription } from "../outputHelper";
 
 const projectRoot = path.join(__dirname, "..", "..");
@@ -18,7 +18,8 @@ fs.writeFileSync(
         ...inputNames.map((inputName, i) => [
             `  ${inputName}:`,
             `    required: ${i === 0 ? "true" : "false"}`,
-            `    description: '${getInputDescription(inputName).replace(/'/g,"''")}'`
+            `    description: '${getInputDescription(inputName).replace(/'/g,"''")}'`,
+            ...[getInputDefault(inputName)].filter(x=>x!==undefined).map(s=>`    default: '${s}'`)
         ].join("\n")),
         `outputs:`,
         ...outputNames.map((outputName, i) => [

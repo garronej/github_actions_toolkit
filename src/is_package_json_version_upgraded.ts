@@ -4,14 +4,15 @@ const urlJoin: typeof import("path").join = require("url-join");
 import { setOutputFactory } from "./outputHelper";
 import { NpmModuleVersion } from "./tools/NpmModuleVersion";
 import { getActionParamsFactory } from "./inputHelper";
-import { listTagsFactory } from "./tools/octokit-addons/listTags";
-import { createOctokit } from "./tools/createOctokit";
+import { createOctokit } from "./tools/createOctokit";
+import { getLatestSemVersionedTagFactory } from "./tools/octokit-addons/getLatestSemVersionedTag";
 
 export const { getActionParams } = getActionParamsFactory({
     "inputNameSubset": [
         "owner",
         "repo",
-        "branch"
+        "branch",
+        "github_token"
     ] as const
 });
 
@@ -31,13 +32,22 @@ export async function action(
 
     core.debug(JSON.stringify(params));
 
-    const { owner, repo, branch } = params;
+    const { owner, repo, branch, github_token } = params;
 
     const to_version = await getPackageJsonVersion({ owner, repo, branch });
 
+    if( to_version === undefined ){
+        throw new Error("No version in package.json on ${owner}/${repo}#${branch} (or repo is private)");
+    }
+
     core.debug(`Version on ${owner}/${repo}#${branch} is ${NpmModuleVersion.stringify(to_version)}`);
 
-    const from_version = await getLatestSemVersionedTag({ owner, repo });
+    const octokit = createOctokit({ github_token });
+
+    const { getLatestSemVersionedTag } = getLatestSemVersionedTagFactory({ octokit });
+
+    const { version: from_version } = await getLatestSemVersionedTag({ owner, repo })
+        .then(wrap => wrap === undefined ? { "version": NpmModuleVersion.parse("0.0.0") } : wrap);
 
     core.debug(`Last version was ${NpmModuleVersion.stringify(from_version)}`);
 
@@ -56,17 +66,18 @@ export async function action(
 
 }
 
+//TODO: Find a way to make it work with private repo
 async function getPackageJsonVersion(params: {
     owner: string;
     repo: string;
     branch: string;
-}): Promise<NpmModuleVersion> {
+}): Promise<NpmModuleVersion | undefined> {
 
     const { owner, repo, branch } = params;
 
     const version = await fetch(
         urlJoin(
-            "https://raw.github.com",
+            `https://raw.github.com`,
             owner,
             repo,
             branch,
@@ -76,36 +87,14 @@ async function getPackageJsonVersion(params: {
         .then(res => res.text())
         .then(text => JSON.parse(text))
         .then(({ version }) => version as string)
-        .catch(() => "")
+        .catch(()=> undefined)
         ;
 
-    return NpmModuleVersion.parse(version || "0.0.0");
+    if( version === undefined){
+        return undefined;
+    }
+
+    return NpmModuleVersion.parse(version);
 
 }
 
-const getLatestSemVersionedTag = async (params: { owner: string; repo: string; }) => {
-
-    const { owner, repo } = params;
-
-    const semVersionedTags: string[] = [];
-
-    const { listTags } = listTagsFactory({ "octokit": createOctokit() });
-
-    for await (const tag of listTags({ owner, repo })) {
-
-        const match = tag.match(/^v([0-9]+\.[0-9]+\.[0-9]+)$/);
-
-        if (!match) {
-            continue;
-        }
-
-        semVersionedTags.push(match[1]);
-
-    }
-
-    return semVersionedTags
-        .map(NpmModuleVersion.parse)
-        .sort((vX, vY) => NpmModuleVersion.compare(vY, vX))
-    [0];
-
-};

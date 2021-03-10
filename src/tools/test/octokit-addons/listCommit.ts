@@ -4,7 +4,7 @@ import { createOctokit } from "../../createOctokit";
 
 (async ()=>{
 
-    const octokit = createOctokit();
+    const octokit = createOctokit({ "github_token": "" });
 
 
     const { listCommit } = listCommitFactory({ octokit });

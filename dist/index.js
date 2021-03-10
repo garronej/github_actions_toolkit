@@ -7856,6 +7856,71 @@ exports.getState = getState;
 
 /***/ }),
 
+/***/ 472:
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __asyncValues = (this && this.__asyncValues) || function (o) {
+    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+    var m = o[Symbol.asyncIterator], i;
+    return m ? m.call(o) : (o = typeof __values === "function" ? __values(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i);
+    function verb(n) { i[n] = o[n] && function (v) { return new Promise(function (resolve, reject) { v = o[n](v), settle(resolve, reject, v.done, v.value); }); }; }
+    function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.getLatestSemVersionedTagFactory = void 0;
+const listTags_1 = __webpack_require__(500);
+const NpmModuleVersion_1 = __webpack_require__(395);
+function getLatestSemVersionedTagFactory(params) {
+    const { octokit } = params;
+    function getLatestSemVersionedTag(params) {
+        var e_1, _a;
+        return __awaiter(this, void 0, void 0, function* () {
+            const { owner, repo } = params;
+            const semVersionedTags = [];
+            const { listTags } = listTags_1.listTagsFactory({ octokit });
+            try {
+                for (var _b = __asyncValues(listTags({ owner, repo })), _c; _c = yield _b.next(), !_c.done;) {
+                    const tag = _c.value;
+                    const match = tag.match(/^v?([0-9]+\.[0-9]+\.[0-9]+)$/);
+                    if (!match) {
+                        continue;
+                    }
+                    semVersionedTags.push({
+                        tag,
+                        "version": NpmModuleVersion_1.NpmModuleVersion.parse(match[1])
+                    });
+                }
+            }
+            catch (e_1_1) { e_1 = { error: e_1_1 }; }
+            finally {
+                try {
+                    if (_c && !_c.done && (_a = _b.return)) yield _a.call(_b);
+                }
+                finally { if (e_1) throw e_1.error; }
+            }
+            return semVersionedTags
+                .sort(({ version: vX }, { version: vY }) => NpmModuleVersion_1.NpmModuleVersion.compare(vY, vX))[0];
+        });
+    }
+    ;
+    return { getLatestSemVersionedTag };
+}
+exports.getLatestSemVersionedTagFactory = getLatestSemVersionedTagFactory;
+
+
+/***/ }),
+
 /***/ 489:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -8021,7 +8086,7 @@ exports.gitCommit = void 0;
 const st = __importStar(__webpack_require__(425));
 function gitCommit(params) {
     return __awaiter(this, void 0, void 0, function* () {
-        const { owner, repo, commitAuthorEmail, performChanges } = params;
+        const { owner, repo, commitAuthorEmail, performChanges, github_token } = params;
         yield st.exec(`git clone https://github.com/${owner}/${repo}`);
         const cwd = process.cwd();
         process.chdir(repo);
@@ -8040,7 +8105,7 @@ function gitCommit(params) {
                 yield st.exec(`git add -A`);
             }
             yield st.exec(`git commit -am "${changesResult.message}"`);
-            yield st.exec(`git push "https://${owner}:${process.env["GITHUB_TOKEN"]}@github.com/${owner}/${repo}.git"`);
+            yield st.exec(`git push "https://${owner}:${github_token}@github.com/${owner}/${repo}.git"`);
         }
         process.chdir(cwd);
         yield st.exec(`rm -r ${repo}`);
@@ -8130,14 +8195,15 @@ exports.getActionParams = inputHelper_1.getActionParamsFactory({
     "inputNameSubset": [
         "owner",
         "repo",
-        "should_webhook_be_enabled"
+        "should_webhook_be_enabled",
+        "github_token"
     ]
 }).getActionParams;
 exports.setOutput = outputHelper_1.setOutputFactory().setOutput;
 function action(_actionName, params, core) {
     return __awaiter(this, void 0, void 0, function* () {
-        const { owner, repo, should_webhook_be_enabled } = params;
-        const octokit = createOctokit_1.createOctokit();
+        const { owner, repo, should_webhook_be_enabled, github_token } = params;
+        const octokit = createOctokit_1.createOctokit({ github_token });
         try {
             yield octokit.repos.createWebhook({
                 owner,
@@ -8630,7 +8696,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getActionName = exports.getActionParamsFactory = exports.getInputDescription = exports.availableActions = exports.inputNames = void 0;
+exports.getActionName = exports.getActionParamsFactory = exports.getInputDefault = exports.getInputDescription = exports.availableActions = exports.inputNames = void 0;
 const core = __importStar(__webpack_require__(470));
 exports.inputNames = [
     "action_name",
@@ -8639,8 +8705,6 @@ exports.inputNames = [
     "event_type",
     "client_payload_json",
     "branch",
-    "branch_behind",
-    "branch_ahead",
     "commit_author_email",
     "exclude_commit_from_author_names_json",
     "module_name",
@@ -8648,7 +8712,8 @@ exports.inputNames = [
     "input_string",
     "search_value",
     "replace_value",
-    "should_webhook_be_enabled"
+    "should_webhook_be_enabled",
+    "github_token"
 ];
 exports.availableActions = [
     "get_package_json_version",
@@ -8684,8 +8749,6 @@ function getInputDescription(inputName) {
             "repos/#create-a-repository-dispatch-event"
         ].join("");
         case "branch": return "Example: default ( can also be a sha )";
-        case "branch_behind": return "Name of a branch, example: 'default' ( can also be an sha )";
-        case "branch_ahead": return "Name of a branch, example: 'dev' ( can also be an sha )";
         case "commit_author_email": return [
             "Email id  of the bot that will author the commit for ",
             "updating the CHANGELOG.md file, ex: denoify_ci@github.com"
@@ -8708,9 +8771,21 @@ function getInputDescription(inputName) {
         case "search_value": return `For string_replace, Example '-' ( Will be used as arg for RegExp constructor )`;
         case "replace_value": return `For string_replace, Example '_'`;
         case "should_webhook_be_enabled": return `true|false, For debugging purpose, with setup_repo_webhook_for_deno_land_publishing`;
+        case "github_token": return "GitHub Personal access token";
     }
 }
 exports.getInputDescription = getInputDescription;
+function getInputDefault(inputName) {
+    switch (inputName) {
+        case "owner": return "${{github.repository_owner}}";
+        case "repo": return "${{github.event.repository.name}}";
+        case "branch": return "${{ github.sha }}";
+        case "github_token": return "${{ secrets.GITHUB_TOKEN }}";
+        case "commit_author_email": return "github_actions_toolkit@github.com";
+        case "exclude_commit_from_author_names_json": return '["github_actions_toolkit"]';
+    }
+}
+exports.getInputDefault = getInputDefault;
 const getInput = (inputName) => {
     if (exports.inputNames.indexOf(inputName) < 0) {
         throw new Error(`${inputName} expected`);
@@ -8980,36 +9055,44 @@ const getCommitAhead_1 = __webpack_require__(438);
 const get_package_json_version = __importStar(__webpack_require__(43));
 const fs = __importStar(__webpack_require__(747));
 const NpmModuleVersion_1 = __webpack_require__(395);
-const createOctokit_1 = __webpack_require__(906);
 const gitCommit_1 = __webpack_require__(503);
+const getLatestSemVersionedTag_1 = __webpack_require__(472);
+const createOctokit_1 = __webpack_require__(906);
 exports.getActionParams = inputHelper_1.getActionParamsFactory({
     "inputNameSubset": [
         "owner",
         "repo",
-        "branch_behind",
-        "branch_ahead",
+        "branch",
         "commit_author_email",
-        "exclude_commit_from_author_names_json"
+        "exclude_commit_from_author_names_json",
+        "github_token"
     ]
 }).getActionParams;
 function action(_actionName, params, core) {
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
-        const { owner, repo, branch_ahead, branch_behind, commit_author_email } = params;
+        const { owner, repo, branch, commit_author_email, github_token } = params;
         core.debug(`params: ${JSON.stringify(params)}`);
         const exclude_commit_from_author_names = JSON.parse(params.exclude_commit_from_author_names_json);
-        const octokit = createOctokit_1.createOctokit();
+        const octokit = createOctokit_1.createOctokit({ github_token });
         const { getCommitAhead } = getCommitAhead_1.getCommitAheadFactory({ octokit });
+        const { getLatestSemVersionedTag } = getLatestSemVersionedTag_1.getLatestSemVersionedTagFactory({ octokit });
+        const { tag: branchBehind } = (_a = (yield getLatestSemVersionedTag({ owner, repo }))) !== null && _a !== void 0 ? _a : {};
+        if (branchBehind === undefined) {
+            core.warning(`It's the first release, not editing the CHANGELOG.md`);
+            return;
+        }
         const { commits } = yield getCommitAhead({
             owner,
             repo,
-            "branchBehind": branch_behind,
-            "branchAhead": branch_ahead
+            branchBehind,
+            "branchAhead": branch
         }).catch(() => ({ "commits": undefined }));
         if (commits === undefined) {
-            core.warning(`${branch_behind} probably does not exist`);
+            core.warning(`${branchBehind} probably does not exist`);
             return;
         }
-        const [branchBehindVersion, branchAheadVersion] = yield Promise.all([branch_behind, branch_ahead]
+        const [branchBehindVersion, branchAheadVersion] = yield Promise.all([branchBehind, branch]
             .map(branch => get_package_json_version.action("get_package_json_version", {
             owner,
             repo,
@@ -9021,15 +9104,16 @@ function action(_actionName, params, core) {
             "versionBehindStr": branchBehindVersion || "0.0.0"
         });
         if (bumpType === "SAME") {
-            core.warning(`Version on ${branch_ahead} and ${branch_behind} are the same, not editing CHANGELOG.md`);
+            core.warning(`Version on ${branch} and ${branchBehind} are the same, not editing CHANGELOG.md`);
             return;
         }
         yield gitCommit_1.gitCommit({
             owner,
             repo,
+            github_token,
             "commitAuthorEmail": commit_author_email,
             "performChanges": () => __awaiter(this, void 0, void 0, function* () {
-                yield st.exec(`git checkout ${branch_ahead}`);
+                yield st.exec(`git checkout ${branch}`);
                 const { changelogRaw } = updateChangelog({
                     "changelogRaw": fs.existsSync("CHANGELOG.md") ?
                         fs.readFileSync("CHANGELOG.md")
@@ -9891,16 +9975,18 @@ exports.getActionParams = inputHelper_1.getActionParamsFactory({
         "owner",
         "repo",
         "branch",
-        "commit_author_email"
+        "commit_author_email",
+        "github_token"
     ]
 }).getActionParams;
 function action(_actionName, params, core) {
     return __awaiter(this, void 0, void 0, function* () {
         core.debug(JSON.stringify(params));
-        const { owner, repo, branch, commit_author_email } = params;
+        const { owner, repo, branch, commit_author_email, github_token } = params;
         yield gitCommit_1.gitCommit({
             owner,
             repo,
+            github_token,
             "commitAuthorEmail": commit_author_email,
             "performChanges": () => __awaiter(this, void 0, void 0, function* () {
                 yield st.exec(`git checkout ${branch}`);
@@ -11772,14 +11858,15 @@ exports.getActionParams = inputHelper_1.getActionParamsFactory({
         "owner",
         "repo",
         "event_type",
-        "client_payload_json"
+        "client_payload_json",
+        "github_token"
     ]
 }).getActionParams;
 function action(_actionName, params, core) {
     return __awaiter(this, void 0, void 0, function* () {
-        const { owner, repo, event_type, client_payload_json } = params;
+        const { owner, repo, event_type, client_payload_json, github_token } = params;
         core.debug(JSON.stringify({ _actionName, params }));
-        const octokit = createOctokit_1.createOctokit();
+        const octokit = createOctokit_1.createOctokit({ github_token });
         yield octokit.repos.createDispatchEvent(Object.assign({ owner,
             repo,
             event_type }, (!!client_payload_json ?
@@ -12043,10 +12130,9 @@ exports.withCustomRequest = withCustomRequest;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createOctokit = void 0;
 const rest_1 = __webpack_require__(889);
-/** Instantiate an Octokit with auth from $GITHUB_TOKEN in env */
-function createOctokit() {
-    const auth = process.env["GITHUB_TOKEN"];
-    return new rest_1.Octokit(Object.assign({}, (!!auth ? { auth } : {})));
+function createOctokit(params) {
+    const { github_token } = params;
+    return new rest_1.Octokit(Object.assign({}, (github_token !== "" ? { "auth": github_token } : {})));
 }
 exports.createOctokit = createOctokit;
 
@@ -12124,13 +12210,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __asyncValues = (this && this.__asyncValues) || function (o) {
-    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
-    var m = o[Symbol.asyncIterator], i;
-    return m ? m.call(o) : (o = typeof __values === "function" ? __values(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i);
-    function verb(n) { i[n] = o[n] && function (v) { return new Promise(function (resolve, reject) { v = o[n](v), settle(resolve, reject, v.done, v.value); }); }; }
-    function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -12141,23 +12220,30 @@ const urlJoin = __webpack_require__(683);
 const outputHelper_1 = __webpack_require__(762);
 const NpmModuleVersion_1 = __webpack_require__(395);
 const inputHelper_1 = __webpack_require__(649);
-const listTags_1 = __webpack_require__(500);
 const createOctokit_1 = __webpack_require__(906);
+const getLatestSemVersionedTag_1 = __webpack_require__(472);
 exports.getActionParams = inputHelper_1.getActionParamsFactory({
     "inputNameSubset": [
         "owner",
         "repo",
-        "branch"
+        "branch",
+        "github_token"
     ]
 }).getActionParams;
 exports.setOutput = outputHelper_1.setOutputFactory().setOutput;
 function action(_actionName, params, core) {
     return __awaiter(this, void 0, void 0, function* () {
         core.debug(JSON.stringify(params));
-        const { owner, repo, branch } = params;
+        const { owner, repo, branch, github_token } = params;
         const to_version = yield getPackageJsonVersion({ owner, repo, branch });
+        if (to_version === undefined) {
+            throw new Error("No version in package.json on ${owner}/${repo}#${branch} (or repo is private)");
+        }
         core.debug(`Version on ${owner}/${repo}#${branch} is ${NpmModuleVersion_1.NpmModuleVersion.stringify(to_version)}`);
-        const from_version = yield getLatestSemVersionedTag({ owner, repo });
+        const octokit = createOctokit_1.createOctokit({ github_token });
+        const { getLatestSemVersionedTag } = getLatestSemVersionedTag_1.getLatestSemVersionedTagFactory({ octokit });
+        const { version: from_version } = yield getLatestSemVersionedTag({ owner, repo })
+            .then(wrap => wrap === undefined ? { "version": NpmModuleVersion_1.NpmModuleVersion.parse("0.0.0") } : wrap);
         core.debug(`Last version was ${NpmModuleVersion_1.NpmModuleVersion.stringify(from_version)}`);
         const is_upgraded_version = NpmModuleVersion_1.NpmModuleVersion.compare(to_version, from_version) === 1 ? "true" : "false";
         core.debug(`Is version upgraded: ${is_upgraded_version}`);
@@ -12169,43 +12255,21 @@ function action(_actionName, params, core) {
     });
 }
 exports.action = action;
+//TODO: Find a way to make it work with private repo
 function getPackageJsonVersion(params) {
     return __awaiter(this, void 0, void 0, function* () {
         const { owner, repo, branch } = params;
-        const version = yield node_fetch_1.default(urlJoin("https://raw.github.com", owner, repo, branch, "package.json"))
+        const version = yield node_fetch_1.default(urlJoin(`https://raw.github.com`, owner, repo, branch, "package.json"))
             .then(res => res.text())
             .then(text => JSON.parse(text))
             .then(({ version }) => version)
-            .catch(() => "");
-        return NpmModuleVersion_1.NpmModuleVersion.parse(version || "0.0.0");
+            .catch(() => undefined);
+        if (version === undefined) {
+            return undefined;
+        }
+        return NpmModuleVersion_1.NpmModuleVersion.parse(version);
     });
 }
-const getLatestSemVersionedTag = (params) => __awaiter(void 0, void 0, void 0, function* () {
-    var e_1, _a;
-    const { owner, repo } = params;
-    const semVersionedTags = [];
-    const { listTags } = listTags_1.listTagsFactory({ "octokit": createOctokit_1.createOctokit() });
-    try {
-        for (var _b = __asyncValues(listTags({ owner, repo })), _c; _c = yield _b.next(), !_c.done;) {
-            const tag = _c.value;
-            const match = tag.match(/^v([0-9]+\.[0-9]+\.[0-9]+)$/);
-            if (!match) {
-                continue;
-            }
-            semVersionedTags.push(match[1]);
-        }
-    }
-    catch (e_1_1) { e_1 = { error: e_1_1 }; }
-    finally {
-        try {
-            if (_c && !_c.done && (_a = _b.return)) yield _a.call(_b);
-        }
-        finally { if (e_1) throw e_1.error; }
-    }
-    return semVersionedTags
-        .map(NpmModuleVersion_1.NpmModuleVersion.parse)
-        .sort((vX, vY) => NpmModuleVersion_1.NpmModuleVersion.compare(vY, vX))[0];
-});
 
 
 /***/ }),

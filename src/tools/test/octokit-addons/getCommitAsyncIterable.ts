@@ -5,7 +5,7 @@ import { createOctokit } from "../../createOctokit";
 
 (async function () {
 
-    const octokit = createOctokit();
+    const octokit = createOctokit({ "github_token": "" });
 
     const { getCommitAsyncIterable } = getCommitAsyncIterableFactory({ octokit });
 

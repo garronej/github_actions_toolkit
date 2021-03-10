@@ -6,7 +6,8 @@ export const { getActionParams } = getActionParamsFactory({
         "owner", 
         "repo", 
         "event_type",
-        "client_payload_json"
+        "client_payload_json",
+        "github_token"
     ] as const
 });
 
@@ -23,12 +24,12 @@ export async function action(
     core: CoreLike
 ) {
 
-    const { owner, repo, event_type, client_payload_json } = params;
+    const { owner, repo, event_type, client_payload_json, github_token } = params;
 
     core.debug(JSON.stringify({ _actionName, params }));
 
 
-    const octokit = createOctokit();
+    const octokit = createOctokit({ github_token });
 
     await octokit.repos.createDispatchEvent({
         owner,

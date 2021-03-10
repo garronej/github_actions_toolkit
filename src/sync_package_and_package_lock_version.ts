@@ -8,7 +8,8 @@ export const { getActionParams } = getActionParamsFactory({
         "owner",
         "repo",
         "branch",
-        "commit_author_email"
+        "commit_author_email",
+        "github_token"
     ] as const
 });
 
@@ -26,11 +27,12 @@ export async function action(
 
     core.debug(JSON.stringify(params));
 
-    const { owner, repo, branch, commit_author_email } = params;
+    const { owner, repo, branch, commit_author_email, github_token } = params;
 
     await gitCommit({
         owner,
         repo,
+        github_token,
         "commitAuthorEmail": commit_author_email,
         "performChanges": async () => {
 

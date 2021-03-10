@@ -1,11 +1,10 @@
 
-import { Octokit } from "@octokit/rest";
+import { Octokit } from "@octokit/rest";
 
-/** Instantiate an Octokit with auth from $GITHUB_TOKEN in env */
-export function createOctokit(){
+export function createOctokit(params: { github_token: string; }) {
 
-    const auth = process.env["GITHUB_TOKEN"];
+    const { github_token } = params;
 
-    return new Octokit({ ...(!!auth ? { auth } : {}) });
+    return new Octokit({ ...(github_token !== "" ? { "auth": github_token } : {}) });
 
 }

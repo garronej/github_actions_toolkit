@@ -13,7 +13,8 @@ import * as st from "scripting-tools";
         {
             "owner": "garronej",
             "repo": "reimagined_octo_winner_kay",
-            "should_webhook_be_enabled": "false"
+            "should_webhook_be_enabled": "false",
+            "github_token": ""
         },
         {
             "debug": console.log,

@@ -26,8 +26,6 @@ Example use:
           branch_new: ${{dev}}
       - name: Trigger publish if version changed
         uses: garronej/github_actions_toolkit@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
         with:
           action_name: dispatch_event
           owner: ${{github.repository_owner}}

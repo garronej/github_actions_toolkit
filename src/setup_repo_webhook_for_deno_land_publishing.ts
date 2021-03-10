@@ -7,7 +7,8 @@ export const { getActionParams } = getActionParamsFactory({
     "inputNameSubset": [
         "owner",
         "repo",
-        "should_webhook_be_enabled"
+        "should_webhook_be_enabled",
+        "github_token"
     ] as const
 });
 
@@ -27,9 +28,9 @@ export async function action(
     core: CoreLike
 ): Promise<Parameters<typeof setOutput>[0]> {
 
-    const { owner, repo, should_webhook_be_enabled } = params;
+    const { owner, repo, should_webhook_be_enabled, github_token } = params;
 
-    const octokit = createOctokit();
+    const octokit = createOctokit({ github_token });
 
     try {
 

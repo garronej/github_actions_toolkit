@@ -8,8 +8,6 @@ export const inputNames = [
     "event_type",
     "client_payload_json",
     "branch",
-    "branch_behind",
-    "branch_ahead",
     "commit_author_email",
     "exclude_commit_from_author_names_json",
     "module_name",
@@ -17,7 +15,8 @@ export const inputNames = [
     "input_string",
     "search_value",
     "replace_value",
-    "should_webhook_be_enabled"
+    "should_webhook_be_enabled",
+    "github_token"
 ] as const;
 
 export const availableActions = [
@@ -56,8 +55,6 @@ export function getInputDescription(inputName: typeof inputNames[number]): strin
             "repos/#create-a-repository-dispatch-event" 
         ].join("");
         case "branch": return "Example: default ( can also be a sha )";
-        case "branch_behind": return "Name of a branch, example: 'default' ( can also be an sha )";
-        case "branch_ahead": return "Name of a branch, example: 'dev' ( can also be an sha )";
         case "commit_author_email": return [ 
             "Email id  of the bot that will author the commit for ",
             "updating the CHANGELOG.md file, ex: denoify_ci@github.com" 
@@ -80,9 +77,23 @@ export function getInputDescription(inputName: typeof inputNames[number]): strin
         case "search_value": return `For string_replace, Example '-' ( Will be used as arg for RegExp constructor )`;
         case "replace_value": return `For string_replace, Example '_'`;
         case "should_webhook_be_enabled": return `true|false, For debugging purpose, with setup_repo_webhook_for_deno_land_publishing`;
+        case "github_token": return "GitHub Personal access token";
     }
 }
 
+
+export function getInputDefault(inputName: typeof inputNames[number]): string | undefined {
+
+    switch(inputName){
+        case "owner": return "${{github.repository_owner}}";
+        case "repo": return "${{github.event.repository.name}}";
+        case "branch": return "${{ github.sha }}";
+        case "github_token": return "${{ secrets.GITHUB_TOKEN }}";
+        case "commit_author_email": return "github_actions_toolkit@github.com";
+        case "exclude_commit_from_author_names_json": return '["github_actions_toolkit"]';
+    }
+
+}
 
 
 const getInput = (inputName: typeof inputNames[number]) => {
