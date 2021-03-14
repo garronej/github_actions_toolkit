@@ -36,10 +36,11 @@ export async function action(
     const {
         owner,
         repo,
-        branch,
         commit_author_email,
         github_token
     } = params;
+
+    const branch = params.branch.split("/").reverse()[0];
 
     core.debug(`params: ${JSON.stringify(params)}`);
 

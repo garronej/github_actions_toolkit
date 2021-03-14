@@ -9071,7 +9071,8 @@ exports.getActionParams = inputHelper_1.getActionParamsFactory({
 function action(_actionName, params, core) {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
-        const { owner, repo, branch, commit_author_email, github_token } = params;
+        const { owner, repo, commit_author_email, github_token } = params;
+        const branch = params.branch.split("/").reverse()[0];
         core.debug(`params: ${JSON.stringify(params)}`);
         const exclude_commit_from_author_names = JSON.parse(params.exclude_commit_from_author_names_json);
         const octokit = createOctokit_1.createOctokit({ github_token });
