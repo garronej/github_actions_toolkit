@@ -23,10 +23,6 @@ inputs:
     required: false
     description: 'Example: default ( can also be a sha )'
     default: '${{ github.sha }}'
-  commit_author_email:
-    required: false
-    description: 'Email id  of the bot that will author the commit for updating the CHANGELOG.md file, ex: denoify_ci@github.com'
-    default: 'github_actions_toolkit@github.com'
   exclude_commit_from_author_names_json:
     required: false
     description: 'For update_changelog, do not includes commit from user certain committer in the CHANGELOG.md, ex: ''["denoify_ci"]'''

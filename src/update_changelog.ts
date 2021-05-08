@@ -14,7 +14,6 @@ export const { getActionParams } = getActionParamsFactory({
         "owner",
         "repo",
         "branch",
-        "commit_author_email",
         "exclude_commit_from_author_names_json",
         "github_token"
     ] as const
@@ -36,7 +35,6 @@ export async function action(
     const {
         owner,
         repo,
-        commit_author_email,
         github_token
     } = params;
 
@@ -117,7 +115,7 @@ export async function action(
         owner,
         repo,
         github_token,
-        "commitAuthorEmail": commit_author_email,
+        "commitAuthorEmail": "actions@github.com",
         "performChanges": async () => {
 
             await st.exec(`git checkout ${branch}`);

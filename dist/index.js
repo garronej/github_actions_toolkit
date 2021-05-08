@@ -8705,7 +8705,6 @@ exports.inputNames = [
     "event_type",
     "client_payload_json",
     "branch",
-    "commit_author_email",
     "exclude_commit_from_author_names_json",
     "module_name",
     "compare_to_version",
@@ -8749,10 +8748,6 @@ function getInputDescription(inputName) {
             "repos/#create-a-repository-dispatch-event"
         ].join("");
         case "branch": return "Example: default ( can also be a sha )";
-        case "commit_author_email": return [
-            "Email id  of the bot that will author the commit for ",
-            "updating the CHANGELOG.md file, ex: denoify_ci@github.com"
-        ].join("");
         case "exclude_commit_from_author_names_json": return [
             "For update_changelog, do not includes commit from user ",
             `certain committer in the CHANGELOG.md, ex: '["denoify_ci"]'`
@@ -8781,7 +8776,6 @@ function getInputDefault(inputName) {
         case "repo": return "${{github.event.repository.name}}";
         case "branch": return "${{ github.sha }}";
         case "github_token": return "${{ github.token }}";
-        case "commit_author_email": return "github_actions_toolkit@github.com";
         case "exclude_commit_from_author_names_json": return '["github_actions_toolkit"]';
     }
 }
@@ -9063,7 +9057,6 @@ exports.getActionParams = inputHelper_1.getActionParamsFactory({
         "owner",
         "repo",
         "branch",
-        "commit_author_email",
         "exclude_commit_from_author_names_json",
         "github_token"
     ]
@@ -9071,7 +9064,7 @@ exports.getActionParams = inputHelper_1.getActionParamsFactory({
 function action(_actionName, params, core) {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
-        const { owner, repo, commit_author_email, github_token } = params;
+        const { owner, repo, github_token } = params;
         const branch = params.branch.split("/").reverse()[0];
         core.debug(`params: ${JSON.stringify(params)}`);
         const exclude_commit_from_author_names = JSON.parse(params.exclude_commit_from_author_names_json);
@@ -9112,7 +9105,7 @@ function action(_actionName, params, core) {
             owner,
             repo,
             github_token,
-            "commitAuthorEmail": commit_author_email,
+            "commitAuthorEmail": "actions@github.com",
             "performChanges": () => __awaiter(this, void 0, void 0, function* () {
                 yield st.exec(`git checkout ${branch}`);
                 const { changelogRaw } = updateChangelog({
@@ -9976,19 +9969,18 @@ exports.getActionParams = inputHelper_1.getActionParamsFactory({
         "owner",
         "repo",
         "branch",
-        "commit_author_email",
         "github_token"
     ]
 }).getActionParams;
 function action(_actionName, params, core) {
     return __awaiter(this, void 0, void 0, function* () {
         core.debug(JSON.stringify(params));
-        const { owner, repo, branch, commit_author_email, github_token } = params;
+        const { owner, repo, branch, github_token } = params;
         yield gitCommit_1.gitCommit({
             owner,
             repo,
             github_token,
-            "commitAuthorEmail": commit_author_email,
+            "commitAuthorEmail": "actions@github.com",
             "performChanges": () => __awaiter(this, void 0, void 0, function* () {
                 yield st.exec(`git checkout ${branch}`);
                 const { version } = JSON.parse(fs.readFileSync("package.json")

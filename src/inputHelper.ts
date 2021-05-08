@@ -8,7 +8,6 @@ export const inputNames = [
     "event_type",
     "client_payload_json",
     "branch",
-    "commit_author_email",
     "exclude_commit_from_author_names_json",
     "module_name",
     "compare_to_version",
@@ -55,10 +54,6 @@ export function getInputDescription(inputName: typeof inputNames[number]): strin
             "repos/#create-a-repository-dispatch-event" 
         ].join("");
         case "branch": return "Example: default ( can also be a sha )";
-        case "commit_author_email": return [ 
-            "Email id  of the bot that will author the commit for ",
-            "updating the CHANGELOG.md file, ex: denoify_ci@github.com" 
-        ].join("");
         case "exclude_commit_from_author_names_json": return [
             "For update_changelog, do not includes commit from user ", 
             `certain committer in the CHANGELOG.md, ex: '["denoify_ci"]'`
@@ -89,7 +84,6 @@ export function getInputDefault(inputName: typeof inputNames[number]): string |Â
         case "repo": return "${{github.event.repository.name}}";
         case "branch": return "${{ github.sha }}";
         case "github_token": return "${{ github.token }}";
-        case "commit_author_email": return "github_actions_toolkit@github.com";
         case "exclude_commit_from_author_names_json": return '["github_actions_toolkit"]';
     }
 

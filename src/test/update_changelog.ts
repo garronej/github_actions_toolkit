@@ -12,7 +12,6 @@ import * as st from "scripting-tools";
         "owner": "garronej",
         repo,
         "branch": "dev",
-        "commit_author_email": "denoify_ci@github.com",
         "exclude_commit_from_author_names_json": JSON.stringify(["denoify_ci"]),
         "github_token": ""
     },
