@@ -71,7 +71,7 @@ export function getInputDescription(inputName: typeof inputNames[number]): strin
         case "input_string": return `For string_replace, the string to replace`;
         case "search_value": return `For string_replace, Example '-' ( Will be used as arg for RegExp constructor )`;
         case "replace_value": return `For string_replace, Example '_'`;
-        case "should_webhook_be_enabled": return `true|false, For debugging purpose, with setup_repo_webhook_for_deno_land_publishing`;
+        case "should_webhook_be_enabled": return `true|false, Should the create webhook be enabled, with setup_repo_webhook_for_deno_land_publishing`;
         case "github_token": return "GitHub Personal access token";
     }
 }
@@ -84,7 +84,8 @@ export function getInputDefault(inputName: typeof inputNames[number]): string |Â
         case "repo": return "${{github.event.repository.name}}";
         case "branch": return "${{ github.sha }}";
         case "github_token": return "${{ github.token }}";
-        case "exclude_commit_from_author_names_json": return '["github_actions_toolkit"]';
+        case "exclude_commit_from_author_names_json": return '["actions"]';
+        case "should_webhook_be_enabled": return "true";
     }
 
 }

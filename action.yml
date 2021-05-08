@@ -26,7 +26,7 @@ inputs:
   exclude_commit_from_author_names_json:
     required: false
     description: 'For update_changelog, do not includes commit from user certain committer in the CHANGELOG.md, ex: ''["denoify_ci"]'''
-    default: '["github_actions_toolkit"]'
+    default: '["actions"]'
   module_name:
     required: false
     description: 'A candidate module name, Example: lodash'
@@ -44,7 +44,8 @@ inputs:
     description: 'For string_replace, Example ''_'''
   should_webhook_be_enabled:
     required: false
-    description: 'true|false, For debugging purpose, with setup_repo_webhook_for_deno_land_publishing'
+    description: 'true|false, Should the create webhook be enabled, with setup_repo_webhook_for_deno_land_publishing'
+    default: 'true'
   github_token:
     required: false
     description: 'GitHub Personal access token'
