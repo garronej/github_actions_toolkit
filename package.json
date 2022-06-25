@@ -22,7 +22,7 @@
     "comment-json": "^3.0.2",
     "evt": "1.6.8",
     "glob": "^7.1.6",
-    "node-fetch": "^2.6.1",
+    "node-fetch": "^2.6.7",
     "scripting-tools": "^0.19.12",
     "url-join": "^4.0.1",
     "validate-npm-package-name": "^3.0.0"
